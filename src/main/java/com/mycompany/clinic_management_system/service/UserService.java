@@ -9,16 +9,9 @@ import java.util.List;
  * Service interface for User management and authentication.
  */
 public interface UserService {
-
     User registerUser(UserDTO userDTO);
-
     User authenticate(String username, String password);
-
     User getUserById(Long id);
-
-    User getUserByUsername(String username);
-
     List<User> getAllUsers();
-
     List<User> getUsersByRole(Role role);
 }

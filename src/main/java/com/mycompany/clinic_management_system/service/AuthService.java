@@ -6,11 +6,9 @@ import com.mycompany.clinic_management_system.dto.RegisterRequestDTO;
 import com.mycompany.clinic_management_system.dto.UserDTO;
 
 /**
- * Service interface for Authentication and JWT authorization operations.
+ * Service interface for JWT authentication and user registration.
  */
 public interface AuthService {
-
     AuthResponseDTO login(LoginRequestDTO loginRequest);
-
     UserDTO register(RegisterRequestDTO registerRequest);
 }

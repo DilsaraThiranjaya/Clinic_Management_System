@@ -1,7 +1,9 @@
 package com.mycompany.clinic_management_system.service.impl;
 
+import com.mycompany.clinic_management_system.dto.AppointmentDTO;
 import com.mycompany.clinic_management_system.dto.AppointmentRequestDTO;
 import com.mycompany.clinic_management_system.dto.AppointmentResponseDTO;
+import com.mycompany.clinic_management_system.exception.ResourceNotFoundException;
 import com.mycompany.clinic_management_system.model.Appointment;
 import com.mycompany.clinic_management_system.model.Patient;
 import com.mycompany.clinic_management_system.model.Role;
@@ -11,7 +13,6 @@ import com.mycompany.clinic_management_system.repository.PatientRepository;
 import com.mycompany.clinic_management_system.repository.UserRepository;
 import com.mycompany.clinic_management_system.service.AppointmentService;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of {@link AppointmentService} handling scheduling, booking, and retrieval.
+ * Implementation of AppointmentService managing appointment booking and lookups.
  */
 @Service
 @Transactional
@@ -39,110 +40,152 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO registerAppointment(AppointmentRequestDTO requestDTO) {
-        if (requestDTO == null) {
-            throw new IllegalArgumentException("Appointment request data must not be null");
-        }
-
-        // 1. Resolve Patient (create new or retrieve existing by patientId)
+        // Resolve patient: lookup by ID or contact number, or create new patient record
         Patient patient;
         if (requestDTO.getPatientId() != null) {
             patient = patientRepository.findById(requestDTO.getPatientId())
-                    .orElseThrow(() -> new NoSuchElementException("Patient not found with ID: " + requestDTO.getPatientId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + requestDTO.getPatientId()));
+        } else if (requestDTO.getContactNumber() != null && !requestDTO.getContactNumber().isBlank()) {
+            patient = patientRepository.findByContactNumber(requestDTO.getContactNumber())
+                    .orElseGet(() -> patientRepository.save(new Patient(
+                            requestDTO.getPatientName(),
+                            requestDTO.getAddress(),
+                            requestDTO.getContactNumber()
+                    )));
         } else {
-            patient = new Patient();
-            patient.setName(requestDTO.getPatientName());
-            patient.setAddress(requestDTO.getAddress());
-            patient.setContactNumber(requestDTO.getContactNumber());
-            patient = patientRepository.save(patient);
+            patient = patientRepository.save(new Patient(
+                    requestDTO.getPatientName(),
+                    requestDTO.getAddress(),
+                    requestDTO.getContactNumber()
+            ));
         }
 
-        // 2. Resolve User / Staff who registered the appointment
-        User staff = null;
-        if (requestDTO.getUserId() != null) {
-            staff = userRepository.findById(requestDTO.getUserId()).orElse(null);
+        // Resolve staff/user who registers the appointment
+        User user = resolveStaffUser(requestDTO.getUserId());
+
+        Appointment appointment = new Appointment(
+                patient,
+                user,
+                requestDTO.getDentistName(),
+                requestDTO.getTreatmentType(),
+                requestDTO.getAppointmentDate(),
+                requestDTO.getAppointmentTime()
+        );
+
+        Appointment saved = appointmentRepository.save(appointment);
+        return toResponseDTO(saved);
+    }
+
+    @Override
+    public Appointment registerAppointment(AppointmentDTO dto) {
+        Patient patient;
+        if (dto.getPatientId() != null) {
+            patient = patientRepository.findById(dto.getPatientId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + dto.getPatientId()));
+        } else {
+            patient = patientRepository.save(new Patient(dto.getPatientName(), dto.getAddress(), dto.getContactNumber()));
         }
 
-        if (staff == null) {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
-                staff = userRepository.findByUsername(auth.getName()).orElse(null);
-            }
-        }
+        User user = resolveStaffUser(dto.getUserId());
 
-        if (staff == null) {
-            // Fallback to existing first staff/admin user or create fallback user
-            staff = userRepository.findByRole(Role.STAFF).stream().findFirst()
-                    .orElseGet(() -> userRepository.findAll().stream().findFirst()
-                            .orElseThrow(() -> new IllegalStateException("No staff or user exists to assign appointment")));
-        }
+        Appointment appointment = new Appointment(
+                patient,
+                user,
+                dto.getDentistName(),
+                dto.getTreatmentType(),
+                dto.getAppointmentDate(),
+                dto.getAppointmentTime()
+        );
 
-        // 3. Create and persist Appointment
-        Appointment appointment = new Appointment();
-        appointment.setPatient(patient);
-        appointment.setUser(staff);
-        appointment.setDentistName(requestDTO.getDentistName());
-        appointment.setTreatmentType(requestDTO.getTreatmentType());
-        appointment.setAppointmentDate(requestDTO.getAppointmentDate());
-        appointment.setAppointmentTime(requestDTO.getAppointmentTime());
+        return appointmentRepository.save(appointment);
+    }
 
-        Appointment savedAppointment = appointmentRepository.save(appointment);
+    @Override
+    public Appointment registerAppointment(Appointment appointment) {
+        return appointmentRepository.save(appointment);
+    }
 
-        return mapToResponseDTO(savedAppointment);
+    @Override
+    @Transactional(readOnly = true)
+    public Appointment getAppointment(Long appointmentNumber) {
+        return appointmentRepository.findById(appointmentNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with number: " + appointmentNumber));
     }
 
     @Override
     @Transactional(readOnly = true)
     public AppointmentResponseDTO getAppointmentDetails(Long appointmentNumber) {
-        if (appointmentNumber == null) {
-            throw new IllegalArgumentException("Appointment number must not be null");
-        }
+        Appointment apt = getAppointment(appointmentNumber);
+        return toResponseDTO(apt);
+    }
 
-        Appointment appointment = appointmentRepository.findById(appointmentNumber)
-                .orElseThrow(() -> new NoSuchElementException("Appointment not found with number: " + appointmentNumber));
-
-        return mapToResponseDTO(appointment);
+    @Override
+    @Transactional(readOnly = true)
+    public AppointmentDTO findAppointment(Long appointmentNumber) {
+        Appointment apt = getAppointment(appointmentNumber);
+        return new AppointmentDTO(
+                apt.getAppointmentNumber(),
+                apt.getPatient().getId(),
+                apt.getUser().getId(),
+                apt.getPatient().getName(),
+                apt.getPatient().getAddress(),
+                apt.getPatient().getContactNumber(),
+                apt.getDentistName(),
+                apt.getTreatmentType(),
+                apt.getAppointmentDate(),
+                apt.getAppointmentTime()
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getAllAppointments() {
         return appointmentRepository.findAll().stream()
-                .map(this::mapToResponseDTO)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getAppointmentsByPatientId(Long patientId) {
-        if (patientId == null) {
-            throw new IllegalArgumentException("Patient ID must not be null");
-        }
         return appointmentRepository.findByPatientId(patientId).stream()
-                .map(this::mapToResponseDTO)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private AppointmentResponseDTO mapToResponseDTO(Appointment appointment) {
-        AppointmentResponseDTO dto = new AppointmentResponseDTO();
-        dto.setAppointmentNumber(appointment.getAppointmentNumber());
-
-        if (appointment.getPatient() != null) {
-            dto.setPatientId(appointment.getPatient().getId());
-            dto.setPatientName(appointment.getPatient().getName());
-            dto.setPatientAddress(appointment.getPatient().getAddress());
-            dto.setContactNumber(appointment.getPatient().getContactNumber());
+    private User resolveStaffUser(Long explicitUserId) {
+        if (explicitUserId != null) {
+            return userRepository.findById(explicitUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + explicitUserId));
         }
 
-        dto.setDentistName(appointment.getDentistName());
-        dto.setTreatmentType(appointment.getTreatmentType());
-        dto.setAppointmentDate(appointment.getAppointmentDate());
-        dto.setAppointmentTime(appointment.getAppointmentTime());
-
-        if (appointment.getUser() != null) {
-            dto.setStaffId(appointment.getUser().getId());
-            dto.setStaffUsername(appointment.getUser().getUsername());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            User authUser = userRepository.findByUsername(auth.getName()).orElse(null);
+            if (authUser != null) {
+                return authUser;
+            }
         }
 
-        return dto;
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.STAFF || u.getRole() == Role.ADMIN)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No authorized staff account available to record appointment"));
+    }
+
+    private AppointmentResponseDTO toResponseDTO(Appointment apt) {
+        return new AppointmentResponseDTO(
+                apt.getAppointmentNumber(),
+                apt.getPatient().getId(),
+                apt.getPatient().getName(),
+                apt.getPatient().getAddress(),
+                apt.getPatient().getContactNumber(),
+                apt.getDentistName(),
+                apt.getTreatmentType(),
+                apt.getAppointmentDate(),
+                apt.getAppointmentTime(),
+                apt.getUser().getId(),
+                apt.getUser().getUsername()
+        );
     }
 }

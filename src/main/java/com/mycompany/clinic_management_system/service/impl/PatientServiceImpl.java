@@ -1,16 +1,16 @@
 package com.mycompany.clinic_management_system.service.impl;
 
 import com.mycompany.clinic_management_system.dto.PatientDTO;
+import com.mycompany.clinic_management_system.exception.ResourceNotFoundException;
 import com.mycompany.clinic_management_system.model.Patient;
 import com.mycompany.clinic_management_system.repository.PatientRepository;
 import com.mycompany.clinic_management_system.service.PatientService;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of {@link PatientService} handling patient CRUD operations.
+ * Implementation of PatientService managing patient registration and profiles.
  */
 @Service
 @Transactional
@@ -24,26 +24,24 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Patient registerPatient(PatientDTO patientDTO) {
-        if (patientDTO == null) {
-            throw new IllegalArgumentException("Patient details must not be null");
-        }
+        Patient patient = new Patient(
+                patientDTO.getName(),
+                patientDTO.getAddress(),
+                patientDTO.getContactNumber()
+        );
+        return patientRepository.save(patient);
+    }
 
-        Patient patient = new Patient();
-        patient.setName(patientDTO.getName());
-        patient.setAddress(patientDTO.getAddress());
-        patient.setContactNumber(patientDTO.getContactNumber());
-
+    @Override
+    public Patient registerPatient(Patient patient) {
         return patientRepository.save(patient);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Patient getPatientById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Patient ID must not be null");
-        }
         return patientRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Patient not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
     }
 
     @Override
@@ -54,30 +52,17 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Patient updatePatient(Long id, PatientDTO patientDTO) {
-        if (id == null) {
-            throw new IllegalArgumentException("Patient ID must not be null");
-        }
-        if (patientDTO == null) {
-            throw new IllegalArgumentException("Patient details must not be null");
-        }
-
-        Patient existingPatient = patientRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Patient not found with ID: " + id));
-
-        existingPatient.setName(patientDTO.getName());
-        existingPatient.setAddress(patientDTO.getAddress());
-        existingPatient.setContactNumber(patientDTO.getContactNumber());
-
-        return patientRepository.save(existingPatient);
+        Patient existing = getPatientById(id);
+        existing.setName(patientDTO.getName());
+        existing.setAddress(patientDTO.getAddress());
+        existing.setContactNumber(patientDTO.getContactNumber());
+        return patientRepository.save(existing);
     }
 
     @Override
     public void deletePatient(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Patient ID must not be null");
-        }
         if (!patientRepository.existsById(id)) {
-            throw new NoSuchElementException("Patient not found with ID: " + id);
+            throw new ResourceNotFoundException("Patient not found with id: " + id);
         }
         patientRepository.deleteById(id);
     }

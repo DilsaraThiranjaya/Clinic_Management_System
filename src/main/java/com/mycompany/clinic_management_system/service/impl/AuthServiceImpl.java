@@ -4,10 +4,11 @@ import com.mycompany.clinic_management_system.dto.AuthResponseDTO;
 import com.mycompany.clinic_management_system.dto.LoginRequestDTO;
 import com.mycompany.clinic_management_system.dto.RegisterRequestDTO;
 import com.mycompany.clinic_management_system.dto.UserDTO;
+import com.mycompany.clinic_management_system.exception.ResourceNotFoundException;
 import com.mycompany.clinic_management_system.model.Role;
 import com.mycompany.clinic_management_system.model.User;
 import com.mycompany.clinic_management_system.repository.UserRepository;
-import com.mycompany.clinic_management_system.security.JwtTokenProvider;
+import com.mycompany.clinic_management_system.security.JwtUtils;
 import com.mycompany.clinic_management_system.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of {@link AuthService} handling JWT authentication and registration.
+ * Implementation of AuthService for handling JWT-based user authentication.
  */
 @Service
 @Transactional
@@ -27,24 +28,21 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
+    private final JwtUtils jwtUtils;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtTokenProvider tokenProvider) {
+                           JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.tokenProvider = tokenProvider;
+        this.jwtUtils = jwtUtils;
     }
 
     @Override
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
-        if (loginRequest == null) {
-            throw new IllegalArgumentException("Login request must not be null");
-        }
-
+        // Authenticate credentials against UserDetailsService
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -54,29 +52,33 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        // Generate JWT token with user identity and role claim
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
         User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + loginRequest.getUsername()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + loginRequest.getUsername()));
 
-        String token = tokenProvider.generateToken(user.getUsername(), user.getRole().name());
-
-        return new AuthResponseDTO(token, user.getId(), user.getUsername(), user.getRole(), tokenProvider.getExpirationMs());
+        return new AuthResponseDTO(
+                jwt,
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                jwtUtils.getExpirationTimeMs()
+        );
     }
 
     @Override
     public UserDTO register(RegisterRequestDTO registerRequest) {
-        if (registerRequest == null) {
-            throw new IllegalArgumentException("Register request must not be null");
-        }
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new IllegalArgumentException("Username is already taken: " + registerRequest.getUsername());
         }
 
-        Role assignedRole = registerRequest.getRole() != null ? registerRequest.getRole() : Role.PATIENT;
+        Role role = registerRequest.getRole() != null ? registerRequest.getRole() : Role.STAFF;
 
         User user = new User(
                 registerRequest.getUsername(),
                 passwordEncoder.encode(registerRequest.getPassword()),
-                assignedRole
+                role
         );
 
         User savedUser = userRepository.save(user);
