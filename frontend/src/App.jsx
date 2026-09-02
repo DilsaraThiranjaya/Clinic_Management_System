@@ -104,7 +104,9 @@ export default function App() {
             <Billing selectedId={selectedAppointmentId} />
           )}
 
-          {activeTab === 'help' && <Help />}
+          {activeTab === 'help' && (
+            <Help user={user} setActiveTab={setActiveTab} />
+          )}
         </main>
       </div>
     </div>
