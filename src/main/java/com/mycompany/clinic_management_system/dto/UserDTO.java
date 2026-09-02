@@ -22,13 +22,30 @@ public class UserDTO {
     @NotNull(message = "Role is required (ADMIN, STAFF, or PATIENT)")
     private Role role;
 
+    private String email;
+
     public UserDTO() {
+    }
+
+    public UserDTO(Long id, String username, Role role, String email) {
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.email = email;
     }
 
     public UserDTO(Long id, String username, Role role) {
         this.id = id;
         this.username = username;
         this.role = role;
+    }
+
+    public UserDTO(Long id, String username, String password, Role role, String email) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
     }
 
     public UserDTO(Long id, String username, String password, Role role) {
@@ -68,5 +85,13 @@ public class UserDTO {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

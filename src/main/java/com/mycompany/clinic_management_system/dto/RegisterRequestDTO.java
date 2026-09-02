@@ -1,6 +1,7 @@
 package com.mycompany.clinic_management_system.dto;
 
 import com.mycompany.clinic_management_system.model.Role;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,7 +22,18 @@ public class RegisterRequestDTO {
     @NotNull(message = "User role is required (ADMIN, STAFF, or PATIENT)")
     private Role role;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
+
     public RegisterRequestDTO() {
+    }
+
+    public RegisterRequestDTO(String username, String password, Role role, String email) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
     }
 
     public RegisterRequestDTO(String username, String password, Role role) {
@@ -52,5 +64,13 @@ public class RegisterRequestDTO {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

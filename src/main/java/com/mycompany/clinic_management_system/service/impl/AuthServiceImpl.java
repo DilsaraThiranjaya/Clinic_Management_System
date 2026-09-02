@@ -10,6 +10,7 @@ import com.mycompany.clinic_management_system.model.User;
 import com.mycompany.clinic_management_system.repository.UserRepository;
 import com.mycompany.clinic_management_system.security.JwtUtils;
 import com.mycompany.clinic_management_system.service.AuthService;
+import com.mycompany.clinic_management_system.service.EmailService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,15 +30,18 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final EmailService emailService;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtUtils jwtUtils) {
+                           JwtUtils jwtUtils,
+                           EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.emailService = emailService;
     }
 
     @Override
@@ -73,16 +77,24 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Username is already taken: " + registerRequest.getUsername());
         }
 
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new IllegalArgumentException("Email is already in use: " + registerRequest.getEmail());
+        }
+
         Role role = registerRequest.getRole() != null ? registerRequest.getRole() : Role.STAFF;
 
         User user = new User(
                 registerRequest.getUsername(),
                 passwordEncoder.encode(registerRequest.getPassword()),
-                role
+                role,
+                registerRequest.getEmail()
         );
 
         User savedUser = userRepository.save(user);
 
-        return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getRole());
+        // Send Welcome Email asynchronously
+        emailService.sendRegistrationWelcomeEmail(savedUser.getEmail(), savedUser.getUsername());
+
+        return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getRole(), savedUser.getEmail());
     }
 }

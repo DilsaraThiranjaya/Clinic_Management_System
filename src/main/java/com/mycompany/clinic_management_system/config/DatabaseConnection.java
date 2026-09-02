@@ -20,9 +20,9 @@ public class DatabaseConnection {
     // Singleton constructor
     DatabaseConnection() {
         this.dataSource = DataSourceBuilder.create()
-                .driverClassName("org.h2.Driver")
-                .url("jdbc:h2:mem:clinicdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE")
-                .username("sa")
+                .driverClassName("com.mysql.cj.jdbc.Driver")
+                .url("jdbc:mysql://localhost:3306/clinic_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true")
+                .username("root")
                 .password("")
                 .build();
     }
