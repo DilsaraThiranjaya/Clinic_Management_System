@@ -67,7 +67,7 @@ public class ValidationAndConstraintTest {
         @Test
         @DisplayName("TC-VAL-AUTH-04: Password shorter than 6 characters in Register Request fails validation")
         void testRegister_ShortPassword_FailsValidation() {
-            RegisterRequestDTO dto = new RegisterRequestDTO("staff_user", "123", Role.STAFF);
+            RegisterRequestDTO dto = new RegisterRequestDTO("staff_user", "123", Role.STAFF, "staff@example.com");
             Set<ConstraintViolation<RegisterRequestDTO>> violations = validator.validate(dto);
             assertFalse(violations.isEmpty());
         }
@@ -75,7 +75,7 @@ public class ValidationAndConstraintTest {
         @Test
         @DisplayName("TC-VAL-AUTH-05: Blank username in Register Request fails validation")
         void testRegister_BlankUsername_FailsValidation() {
-            RegisterRequestDTO dto = new RegisterRequestDTO("   ", "securePassword123", Role.STAFF);
+            RegisterRequestDTO dto = new RegisterRequestDTO("   ", "securePassword123", Role.STAFF, "staff@example.com");
             Set<ConstraintViolation<RegisterRequestDTO>> violations = validator.validate(dto);
             assertFalse(violations.isEmpty());
         }
@@ -83,7 +83,7 @@ public class ValidationAndConstraintTest {
         @Test
         @DisplayName("TC-VAL-AUTH-06: Null role in Register Request fails validation")
         void testRegister_NullRole_FailsValidation() {
-            RegisterRequestDTO dto = new RegisterRequestDTO("staff_user", "securePassword123", null);
+            RegisterRequestDTO dto = new RegisterRequestDTO("staff_user", "securePassword123", null, "staff@example.com");
             Set<ConstraintViolation<RegisterRequestDTO>> violations = validator.validate(dto);
             assertFalse(violations.isEmpty());
         }

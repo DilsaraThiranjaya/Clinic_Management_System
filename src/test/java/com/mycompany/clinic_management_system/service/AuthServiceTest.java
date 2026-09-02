@@ -50,6 +50,9 @@ public class AuthServiceTest {
     @Mock
     private JwtUtils jwtUtils;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -86,8 +89,8 @@ public class AuthServiceTest {
     @Test
     @DisplayName("TC-AUTH-02: Successful User Registration encodes password and saves user")
     void testSuccessfulUserRegistration() {
-        RegisterRequestDTO request = new RegisterRequestDTO("receptionist1", "pass12345", Role.STAFF);
-        User savedUser = new User(3L, "receptionist1", "encoded_pass", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("receptionist1", "pass12345", Role.STAFF, "receptionist1@example.com");
+        User savedUser = new User(3L, "receptionist1", "encoded_pass", Role.STAFF, "receptionist1@example.com");
 
         when(userRepository.existsByUsername("receptionist1")).thenReturn(false);
         when(passwordEncoder.encode("pass12345")).thenReturn("encoded_pass");
@@ -99,7 +102,9 @@ public class AuthServiceTest {
         assertEquals(3L, response.getId());
         assertEquals("receptionist1", response.getUsername());
         assertEquals(Role.STAFF, response.getRole());
+        assertEquals("receptionist1@example.com", response.getEmail());
         verify(userRepository).save(any(User.class));
+        verify(emailService).sendRegistrationWelcomeEmail("receptionist1@example.com", "receptionist1");
     }
 
     @Test
@@ -130,7 +135,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("TC-AUTH-05: Registration with Duplicate Username throws IllegalArgumentException")
     void testRegisterWithDuplicateUsername_ThrowsException() {
-        RegisterRequestDTO request = new RegisterRequestDTO("staff", "pass123", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("staff", "pass123", Role.STAFF, "staff@example.com");
 
         when(userRepository.existsByUsername("staff")).thenReturn(true);
 
@@ -141,8 +146,8 @@ public class AuthServiceTest {
     @Test
     @DisplayName("TC-AUTH-06: Registration with Null Role defaults safely to STAFF role")
     void testRegisterWithNullRole_DefaultsToStaffRole() {
-        RegisterRequestDTO request = new RegisterRequestDTO("new_assistant", "pass12345", null);
-        User savedUser = new User(4L, "new_assistant", "encoded_pass", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("new_assistant", "pass12345", null, "assistant@example.com");
+        User savedUser = new User(4L, "new_assistant", "encoded_pass", Role.STAFF, "assistant@example.com");
 
         when(userRepository.existsByUsername("new_assistant")).thenReturn(false);
         when(passwordEncoder.encode("pass12345")).thenReturn("encoded_pass");
@@ -152,6 +157,7 @@ public class AuthServiceTest {
 
         assertNotNull(response);
         assertEquals(Role.STAFF, response.getRole());
+        verify(emailService).sendRegistrationWelcomeEmail("assistant@example.com", "new_assistant");
     }
 
     @Test

@@ -99,8 +99,8 @@ public class AuthControllerTest {
     @Test
     @DisplayName("TC-CTRL-AUTH-04: POST /api/auth/register with valid payload returns 201 Created")
     void testRegister_ValidPayload_ReturnsCreated() throws Exception {
-        RegisterRequestDTO request = new RegisterRequestDTO("new_receptionist", "securePass123", Role.STAFF);
-        UserDTO response = new UserDTO(5L, "new_receptionist", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("new_receptionist", "securePass123", Role.STAFF, "receptionist@example.com");
+        UserDTO response = new UserDTO(5L, "new_receptionist", Role.STAFF, "receptionist@example.com");
 
         when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);
 
@@ -109,13 +109,14 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("new_receptionist"))
-                .andExpect(jsonPath("$.role").value("STAFF"));
+                .andExpect(jsonPath("$.role").value("STAFF"))
+                .andExpect(jsonPath("$.email").value("receptionist@example.com"));
     }
 
     @Test
     @DisplayName("TC-CTRL-AUTH-05: POST /api/auth/register with duplicate username returns 400 Bad Request")
     void testRegister_DuplicateUsername_ReturnsBadRequest() throws Exception {
-        RegisterRequestDTO request = new RegisterRequestDTO("staff", "securePass123", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("staff", "securePass123", Role.STAFF, "staff@example.com");
 
         when(authService.register(any(RegisterRequestDTO.class)))
                 .thenThrow(new IllegalArgumentException("Username is already taken: staff"));
@@ -130,7 +131,7 @@ public class AuthControllerTest {
     @Test
     @DisplayName("TC-CTRL-AUTH-06: POST /api/auth/register with short password returns 400 Bad Request")
     void testRegister_ShortPassword_ReturnsBadRequest() throws Exception {
-        RegisterRequestDTO request = new RegisterRequestDTO("staff_user", "123", Role.STAFF);
+        RegisterRequestDTO request = new RegisterRequestDTO("staff_user", "123", Role.STAFF, "staff@example.com");
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
