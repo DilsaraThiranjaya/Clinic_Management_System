@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
-export default function Billing({ selectedId }) {
+export default function Billing({ user, selectedId }) {
   const [appointmentNum, setAppointmentNum] = useState(selectedId ? String(selectedId) : '1');
   const [billReceipt, setBillReceipt] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  if (user?.role === 'PATIENT') {
+    return (
+      <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center', padding: '36px' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔒</div>
+        <h2>Patient Billing Notice</h2>
+        <p style={{ color: '#64748b', marginTop: '8px', lineHeight: '1.6' }}>
+          In accordance with Sunrise Dental Clinic billing and clinical governance protocols, patients are not permitted to calculate or generate bills.
+          Please visit the front-desk reception counter upon completion of your appointment to settle treatment payments and receive your official invoice receipt.
+        </p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (selectedId) {

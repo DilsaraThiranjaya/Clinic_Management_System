@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
-export default function SearchAppointment({ selectedId, setActiveTab, onSelectAppointment }) {
+export default function SearchAppointment({ user, selectedId, setActiveTab, onSelectAppointment }) {
   const [searchTerm, setSearchTerm] = useState(selectedId ? String(selectedId) : '1');
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,8 +44,12 @@ export default function SearchAppointment({ selectedId, setActiveTab, onSelectAp
       <div className="card">
         <div className="card-header">
           <div>
-            <h2>Search & Display Appointment</h2>
-            <p className="card-subtitle">Search registered appointments by unique appointment number</p>
+            <h2>{user?.role === 'PATIENT' ? 'Look Up Your Appointment' : 'Search & Display Appointment'}</h2>
+            <p className="card-subtitle">
+              {user?.role === 'PATIENT'
+                ? 'Enter your unique appointment number to inspect booking time, attending dentist & details'
+                : 'Search registered appointments by unique appointment number'}
+            </p>
           </div>
         </div>
 
@@ -58,6 +62,7 @@ export default function SearchAppointment({ selectedId, setActiveTab, onSelectAp
               placeholder="Enter Appointment Number (e.g. 1)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              required
             />
           </div>
           <button type="submit" className="btn btn-primary">
@@ -122,16 +127,36 @@ export default function SearchAppointment({ selectedId, setActiveTab, onSelectAp
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  onSelectAppointment(appointment.appointmentNumber);
-                  setActiveTab('billing');
-                }}
-              >
-                Proceed to Generate & Print Bill →
-              </button>
+            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              {user?.role === 'PATIENT' ? (
+                <div style={{ padding: '12px 18px', background: '#e0f2fe', border: '1px solid #7dd3fc', borderRadius: '8px', fontSize: '0.85rem', color: '#0369a1', width: '100%' }}>
+                  ℹ️ <strong>Patient Notice:</strong> You can view and search your scheduled appointment details above. In accordance with clinic policy, official billing calculations and invoices are generated and settled by reception staff at the clinic checkout counter.
+                </div>
+              ) : user?.role === 'DOCTOR' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    Attending Physician Record View &bull; Treatment billing is finalized by reception
+                  </span>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setActiveTab('dashboard')}
+                  >
+                    ← Back to Clinical Schedule
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      onSelectAppointment(appointment.appointmentNumber);
+                      setActiveTab('billing');
+                    }}
+                  >
+                    Proceed to Generate &amp; Print Bill →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

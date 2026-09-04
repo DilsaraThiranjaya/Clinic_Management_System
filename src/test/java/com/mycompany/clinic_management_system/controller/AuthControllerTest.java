@@ -138,4 +138,70 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("TC-CTRL-AUTH-07: POST /api/auth/register with ADMIN role returns 400 Bad Request")
+    void testRegister_AdminRole_ReturnsBadRequest() throws Exception {
+        RegisterRequestDTO request = new RegisterRequestDTO("new_admin", "adminPass123", Role.ADMIN, "newadmin@example.com");
+
+        when(authService.register(any(RegisterRequestDTO.class)))
+                .thenThrow(new IllegalArgumentException("Admin registration is not allowed. Only the system-seeded admin account is permitted."));
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Admin registration is not allowed. Only the system-seeded admin account is permitted."));
+    }
+
+    @Test
+    @DisplayName("TC-CTRL-AUTH-08: POST /api/auth/register with PATIENT role returns 201 Created")
+    void testRegister_PatientRole_ReturnsCreated() throws Exception {
+        RegisterRequestDTO request = new RegisterRequestDTO("patient_kamal", "patientPass123", Role.PATIENT, "kamal@example.com");
+        UserDTO response = new UserDTO(6L, "patient_kamal", Role.PATIENT, "kamal@example.com");
+
+        when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("patient_kamal"))
+                .andExpect(jsonPath("$.role").value("PATIENT"))
+                .andExpect(jsonPath("$.email").value("kamal@example.com"));
+    }
+
+    @Test
+    @DisplayName("TC-CTRL-AUTH-09: POST /api/auth/login for DOCTOR role returns 200 and Doctor AuthResponse")
+    void testLogin_DoctorRole_ReturnsToken() throws Exception {
+        LoginRequestDTO request = new LoginRequestDTO("doctor", "doctor123");
+        AuthResponseDTO response = new AuthResponseDTO("mock-doctor-jwt", 4L, "doctor", Role.DOCTOR, 86400000L);
+
+        when(authService.login(any(LoginRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("mock-doctor-jwt"))
+                .andExpect(jsonPath("$.username").value("doctor"))
+                .andExpect(jsonPath("$.role").value("DOCTOR"));
+    }
+
+    @Test
+    @DisplayName("TC-CTRL-AUTH-10: POST /api/auth/register with DOCTOR role returns 201 Created")
+    void testRegister_DoctorRole_ReturnsCreated() throws Exception {
+        RegisterRequestDTO request = new RegisterRequestDTO("dr_fernando", "docPass123", Role.DOCTOR, "drfernando@sunrisedental.lk");
+        UserDTO response = new UserDTO(7L, "dr_fernando", Role.DOCTOR, "drfernando@sunrisedental.lk");
+
+        when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("dr_fernando"))
+                .andExpect(jsonPath("$.role").value("DOCTOR"))
+                .andExpect(jsonPath("$.email").value("drfernando@sunrisedental.lk"));
+    }
 }

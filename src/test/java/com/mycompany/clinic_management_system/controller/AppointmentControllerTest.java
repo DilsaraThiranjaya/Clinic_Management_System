@@ -163,4 +163,21 @@ public class AppointmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
+
+    @Test
+    @DisplayName("TC-CTRL-APPT-07: GET /api/appointments/dentist/{dentistName} returns dentist's assigned appointments")
+    void testGetAppointmentsByDentist_ReturnsList() throws Exception {
+        AppointmentResponseDTO response = new AppointmentResponseDTO(
+                101L, 1L, "Sunil De Silva", "No. 78 Duplication Road, Colombo 04",
+                "0719876543", "Dr. Samantha Fernando", "Teeth Cleaning",
+                LocalDate.of(2026, 8, 25), LocalTime.of(10, 0), 1L, "staff"
+        );
+
+        when(appointmentService.getAppointmentsByDentistName("Dr. Samantha Fernando")).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/appointments/dentist/Dr. Samantha Fernando"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].dentistName").value("Dr. Samantha Fernando"));
+    }
 }

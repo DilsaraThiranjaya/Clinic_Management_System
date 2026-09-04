@@ -34,9 +34,10 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO) {
         User created = userService.registerUser(userDTO);
-        UserDTO responseDTO = new UserDTO(created.getId(), created.getUsername(), created.getRole());
+        UserDTO responseDTO = new UserDTO(created.getId(), created.getUsername(), created.getRole(), created.getEmail());
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 

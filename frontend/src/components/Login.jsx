@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import api from '../services/api';
 
 export default function Login({ onLoginSuccess }) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [username, setUsername] = useState('staff');
-  const [password, setPassword] = useState('staff123');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDemoHints, setShowDemoHints] = useState(false);
 
-  const handleQuickSelect = (u, p) => {
+  const fillDemo = (u, p) => {
     setUsername(u);
     setPassword(p);
   };
@@ -20,41 +19,22 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      if (isRegistering) {
-        // Find default role based on quick select or default to STAFF
-        let role = 'STAFF';
-        if (username.toLowerCase().includes('admin')) role = 'ADMIN';
-        else if (username.toLowerCase().includes('patient')) role = 'PATIENT';
+      const response = await api.post('/auth/login', {
+        username: username.trim(),
+        password: password
+      });
+      const data = response.data;
 
-        await api.post('/auth/register', { username, password, email, role });
-        
-        // Auto-login after registration
-        const loginResponse = await api.post('/auth/login', { username, password });
-        const data = loginResponse.data;
+      localStorage.setItem('clinic_jwt_token', data.token);
+      localStorage.setItem('clinic_user', JSON.stringify({
+        id: data.id,
+        username: data.username,
+        role: data.role
+      }));
 
-        localStorage.setItem('clinic_jwt_token', data.token);
-        localStorage.setItem('clinic_user', JSON.stringify({
-          id: data.id,
-          username: data.username,
-          role: data.role
-        }));
-
-        onLoginSuccess(data);
-      } else {
-        const response = await api.post('/auth/login', { username, password });
-        const data = response.data;
-
-        localStorage.setItem('clinic_jwt_token', data.token);
-        localStorage.setItem('clinic_user', JSON.stringify({
-          id: data.id,
-          username: data.username,
-          role: data.role
-        }));
-
-        onLoginSuccess(data);
-      }
+      onLoginSuccess(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed');
+      setError(err.response?.data?.message || 'Authentication failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
@@ -66,28 +46,7 @@ export default function Login({ onLoginSuccess }) {
         <div className="login-header">
           <div className="logo-icon">🦷</div>
           <h2>Sunrise Dental Clinic</h2>
-          <p>Appointment & Patient Management System</p>
-        </div>
-
-        <div className="role-chips">
-          <span
-            className={`role-chip ${username === 'staff' ? 'active' : ''}`}
-            onClick={() => handleQuickSelect('staff', 'staff123')}
-          >
-            Staff (Receptionist)
-          </span>
-          <span
-            className={`role-chip ${username === 'admin' ? 'active' : ''}`}
-            onClick={() => handleQuickSelect('admin', 'admin123')}
-          >
-            Admin
-          </span>
-          <span
-            className={`role-chip ${username === 'patient' ? 'active' : ''}`}
-            onClick={() => handleQuickSelect('patient', 'patient123')}
-          >
-            Patient
-          </span>
+          <p>Unified Portal &bull; Staff, Doctors &amp; Patients</p>
         </div>
 
         {error && (
@@ -95,17 +54,6 @@ export default function Login({ onLoginSuccess }) {
             ⚠️ {error}
           </div>
         )}
-
-        <div className="form-toggle" style={{ marginBottom: '16px', textAlign: 'center' }}>
-          <button 
-            type="button"
-            className="btn btn-secondary" 
-            style={{ width: '100%', marginBottom: '16px' }}
-            onClick={() => setIsRegistering(!isRegistering)}
-          >
-            {isRegistering ? 'Already have an account? Log In' : 'Need an account? Register'}
-          </button>
-        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group" style={{ marginBottom: '16px' }}>
@@ -115,24 +63,11 @@ export default function Login({ onLoginSuccess }) {
               className="form-input"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              placeholder="Enter your assigned username"
               required
+              autoFocus
             />
           </div>
-
-          {isRegistering && (
-            <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email address"
-                required={isRegistering}
-              />
-            </div>
-          )}
 
           <div className="form-group" style={{ marginBottom: '24px' }}>
             <label className="form-label">Password</label>
@@ -141,20 +76,73 @@ export default function Login({ onLoginSuccess }) {
               className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              placeholder="Enter your account password"
               required
             />
           </div>
 
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Processing...' : (isRegistering ? 'Register Account' : 'Sign In to System')}
+            {loading ? 'Authenticating...' : 'Sign In to Portal'}
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+        <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+          🔒 Single secure login for all roles. Your dashboard and clinical privileges adapt automatically upon authentication.
+        </div>
+
+        {/* Subtle expandable demo accounts helper for testing & academic evaluation */}
+        <div style={{ marginTop: '16px', borderTop: '1px dashed #e2e8f0', paddingTop: '12px' }}>
+          <button
+            type="button"
+            onClick={() => setShowDemoHints(!showDemoHints)}
+            style={{ background: 'none', border: 'none', color: '#0d9488', fontSize: '0.78rem', cursor: 'pointer', display: 'block', margin: '0 auto', fontWeight: '600' }}
+          >
+            {showDemoHints ? '▲ Hide Demo Credentials' : '▼ Quick Demo Credentials (For Evaluation)'}
+          </button>
+
+          {showDemoHints && (
+            <div style={{ marginTop: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
+                onClick={() => fillDemo('doctor', 'doctor123')}
+              >
+                🩺 Dentist: doctor
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
+                onClick={() => fillDemo('staff', 'staff123')}
+              >
+                🏥 Staff: staff
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
+                onClick={() => fillDemo('admin', 'admin123')}
+              >
+                ⚙️ Admin: admin
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
+                onClick={() => fillDemo('patient', 'patient123')}
+              >
+                🦷 Patient: patient
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: '14px', textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
           Protected by JWT Role-Based Access Control (RBAC)
         </div>
       </div>
     </div>
   );
 }
+

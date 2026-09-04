@@ -104,7 +104,7 @@ public class AuthServiceTest {
         assertEquals(Role.STAFF, response.getRole());
         assertEquals("receptionist1@example.com", response.getEmail());
         verify(userRepository).save(any(User.class));
-        verify(emailService).sendRegistrationWelcomeEmail("receptionist1@example.com", "receptionist1");
+        verify(emailService).sendRegistrationCredentialsEmail("receptionist1@example.com", "receptionist1", "pass12345", Role.STAFF);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class AuthServiceTest {
 
         assertNotNull(response);
         assertEquals(Role.STAFF, response.getRole());
-        verify(emailService).sendRegistrationWelcomeEmail("assistant@example.com", "new_assistant");
+        verify(emailService).sendRegistrationCredentialsEmail("assistant@example.com", "new_assistant", "pass12345", Role.STAFF);
     }
 
     @Test
@@ -175,5 +175,34 @@ public class AuthServiceTest {
 
         assertNotNull(response);
         assertEquals(Role.ADMIN, response.getRole());
+    }
+
+    @Test
+    @DisplayName("TC-AUTH-08: Registration with ADMIN role throws IllegalArgumentException")
+    void testRegisterWithAdminRole_ThrowsException() {
+        RegisterRequestDTO request = new RegisterRequestDTO("new_admin", "admin123", Role.ADMIN, "admin@example.com");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> authService.register(request));
+        assertEquals("Admin registration is not allowed. Only the system-seeded admin account is permitted.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("TC-AUTH-09: Successful Patient Registration dispatches credentials email")
+    void testSuccessfulPatientRegistration() {
+        RegisterRequestDTO request = new RegisterRequestDTO("patient_kamal", "pass12345", Role.PATIENT, "kamal@example.com");
+        User savedUser = new User(5L, "patient_kamal", "encoded_pass", Role.PATIENT, "kamal@example.com");
+
+        when(userRepository.existsByUsername("patient_kamal")).thenReturn(false);
+        when(passwordEncoder.encode("pass12345")).thenReturn("encoded_pass");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+
+        UserDTO response = authService.register(request);
+
+        assertNotNull(response);
+        assertEquals(5L, response.getId());
+        assertEquals("patient_kamal", response.getUsername());
+        assertEquals(Role.PATIENT, response.getRole());
+        assertEquals("kamal@example.com", response.getEmail());
+        verify(emailService).sendRegistrationCredentialsEmail("kamal@example.com", "patient_kamal", "pass12345", Role.PATIENT);
     }
 }

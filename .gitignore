@@ -1,5 +1,7 @@
-/README.md
+/*.md
+/*.docx
 /images/*
 /target
 /docs
+/scripts/*
 /frontend/node_modules

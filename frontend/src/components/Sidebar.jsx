@@ -2,14 +2,25 @@ import React from 'react';
 
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['ADMIN', 'STAFF'] },
+    { id: 'dashboard', label: user.role === 'DOCTOR' ? 'Clinical Dashboard' : 'Dashboard', icon: user.role === 'DOCTOR' ? '🩺' : '📊', roles: ['ADMIN', 'STAFF', 'DOCTOR'] },
+    { id: 'users', label: 'User Management', icon: '👥', roles: ['ADMIN'] },
     { id: 'register', label: 'Register Appointment', icon: '📝', roles: ['ADMIN', 'STAFF'] },
-    { id: 'search', label: 'Search Appointments', icon: '🔍', roles: ['ADMIN', 'STAFF', 'PATIENT'] },
-    { id: 'billing', label: 'Calculate & Print Bill', icon: '💳', roles: ['ADMIN', 'STAFF', 'PATIENT'] },
-    { id: 'help', label: 'Help & Staff Guide', icon: '❓', roles: ['ADMIN', 'STAFF', 'PATIENT'] }
+    { id: 'search', label: 'Search Appointments', icon: '🔍', roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT'] },
+    { id: 'billing', label: 'Calculate & Print Bill', icon: '💳', roles: ['ADMIN', 'STAFF'] },
+    { id: 'help', label: user.role === 'DOCTOR' ? 'Doctor Clinical Guide' : user.role === 'PATIENT' ? 'Patient Help Guide' : 'Help & Staff Guide', icon: '❓', roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT'] }
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user.role));
+
+  const formatRoleLabel = (role) => {
+    switch (role) {
+      case 'DOCTOR': return 'Dentist (Doctor)';
+      case 'STAFF': return 'Staff (Reception)';
+      case 'ADMIN': return 'Administrator';
+      case 'PATIENT': return 'Patient';
+      default: return role;
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -40,7 +51,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
             <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
             <div className="user-details">
               <h4>{user.username}</h4>
-              <span>{user.role}</span>
+              <span>{formatRoleLabel(user.role)}</span>
             </div>
           </div>
           <button className="btn-logout" onClick={onLogout} title="Logout">

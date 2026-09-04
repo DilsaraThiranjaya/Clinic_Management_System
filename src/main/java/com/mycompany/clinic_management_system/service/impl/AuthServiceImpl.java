@@ -73,6 +73,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO register(RegisterRequestDTO registerRequest) {
+        Role role = registerRequest.getRole() != null ? registerRequest.getRole() : Role.STAFF;
+
+        if (role == Role.ADMIN) {
+            throw new IllegalArgumentException("Admin registration is not allowed. Only the system-seeded admin account is permitted.");
+        }
+
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new IllegalArgumentException("Username is already taken: " + registerRequest.getUsername());
         }
@@ -80,8 +86,6 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new IllegalArgumentException("Email is already in use: " + registerRequest.getEmail());
         }
-
-        Role role = registerRequest.getRole() != null ? registerRequest.getRole() : Role.STAFF;
 
         User user = new User(
                 registerRequest.getUsername(),
@@ -92,8 +96,8 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Send Welcome Email asynchronously
-        emailService.sendRegistrationWelcomeEmail(savedUser.getEmail(), savedUser.getUsername());
+        // Send Login Credentials Email with role-tailored template asynchronously
+        emailService.sendRegistrationCredentialsEmail(savedUser.getEmail(), savedUser.getUsername(), registerRequest.getPassword(), savedUser.getRole());
 
         return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getRole(), savedUser.getEmail());
     }

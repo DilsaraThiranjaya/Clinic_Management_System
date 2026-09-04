@@ -38,23 +38,30 @@ public class AppointmentController {
     }
 
     @GetMapping("/{appointmentNumber}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'PATIENT', 'DOCTOR')")
     public ResponseEntity<AppointmentResponseDTO> displayAppointment(@PathVariable("appointmentNumber") Long appointmentNumber) {
         AppointmentResponseDTO response = appointmentService.getAppointmentDetails(appointmentNumber);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointments() {
         List<AppointmentResponseDTO> list = appointmentService.getAllAppointments();
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'PATIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'PATIENT', 'DOCTOR')")
     public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByPatient(@PathVariable("patientId") Long patientId) {
         List<AppointmentResponseDTO> list = appointmentService.getAppointmentsByPatientId(patientId);
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/dentist/{dentistName}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DOCTOR')")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByDentist(@PathVariable("dentistName") String dentistName) {
+        List<AppointmentResponseDTO> list = appointmentService.getAppointmentsByDentistName(dentistName);
         return ResponseEntity.ok(list);
     }
 }

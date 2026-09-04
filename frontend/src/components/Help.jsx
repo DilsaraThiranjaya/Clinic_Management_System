@@ -136,6 +136,76 @@ export default function Help({ user, setActiveTab }) {
       ]
     },
 
+    // DOCTOR / DENTIST CLINICAL GUIDES
+    {
+      id: 'doctor-1',
+      role: 'DOCTOR',
+      badge: 'Doctor Clinical SOP',
+      title: '1. Daily Clinical Schedule & Chairside Queue Inspection',
+      summary: 'Reviewing assigned dental patient appointments, treatment types, and consultation timings.',
+      action: { tab: 'dashboard', label: 'Open Clinical Dashboard' },
+      steps: [
+        'Access the "Clinical Dashboard" on the left navigation menu.',
+        'View the "Doctor\'s Clinical Schedule & Patient Queue" table displaying appointments assigned to you.',
+        'Use the dentist filter dropdown to isolate your patient queue or inspect general clinic consultations.',
+        'Review patient demographics, telephone contact details, and the scheduled dental procedure (e.g. Teeth Cleaning, Root Canal, Orthodontics).',
+        'Check appointment timings to prepare required clinical operatory instruments in advance.'
+      ]
+    },
+    {
+      id: 'doctor-2',
+      role: 'DOCTOR',
+      badge: 'Doctor Clinical SOP',
+      title: '2. Reviewing Patient Dental History & Diagnostics',
+      summary: 'Inspect patient records and demographics prior to chairside examination.',
+      action: { tab: 'search', label: 'Search Patient Record' },
+      steps: [
+        'From your Clinical Dashboard, click "🔍 View" next to any patient appointment row.',
+        'Alternatively, navigate to "Search Appointments" and input the unique Appointment ID (e.g. #1).',
+        'Review the registered patient name, residential address, emergency phone number, and recording receptionist staff details.',
+        'Verify treatment scope and confirm any contraindications or special care needs.'
+      ]
+    },
+    {
+      id: 'doctor-3',
+      role: 'DOCTOR',
+      badge: 'Clinical Documentation',
+      title: '3. Chairside Clinical Notes & Treatment Progress',
+      summary: 'Documenting tooth quadrants, clinical observations, local anesthesia, and procedure completion.',
+      action: { tab: 'dashboard', label: 'Open Dashboard' },
+      steps: [
+        'On your Clinical Dashboard appointment row, click "📝 Notes" to launch the chairside documentation dialog.',
+        'Enter procedure notes: tooth numbers, restorative materials, local anesthetic dosage, or post-op instructions.',
+        'Click "Save Clinical Note" to persist your notes for the session.',
+        'When the clinical procedure concludes successfully, click "✓ Done" to mark the treatment status as Completed.'
+      ]
+    },
+    {
+      id: 'doctor-4',
+      role: 'DOCTOR',
+      badge: 'Clinical Governance',
+      title: '4. Patient Checkout & Reception Handoff for Invoicing',
+      summary: 'Clinical handoff protocol ensuring doctors do not handle cash or billing calculation.',
+      steps: [
+        'In strict compliance with clinic policy, attending dental surgeons do not calculate or issue invoices directly.',
+        'Upon finishing treatment, instruct the patient to proceed to the front-desk reception counter for payment settlement.',
+        'Receptionist staff retrieve the completed appointment number in the Billing module to generate the official clinical invoice (Base Fee LKR 1,500.00 + Treatment Tariff).',
+        'Reception staff issue the printed payment receipt and collect payment via cash or card.'
+      ]
+    },
+    {
+      id: 'doctor-5',
+      role: 'DOCTOR',
+      badge: 'Security & Hygiene',
+      title: '5. Infection Control, Data Privacy & Session Termination',
+      summary: 'Standard clinical hygiene compliance, healthcare data ethics, and secure terminal exit.',
+      steps: [
+        'Maintain strict infection control and sterilization guidelines between patient chairside sessions.',
+        'Ensure patient medical confidentiality in accordance with medical ethics and data protection standards.',
+        'When stepping away from the operatory terminal or completing your shift, click the "Exit" button at the bottom of the sidebar to invalidate your JWT session.'
+      ]
+    },
+
     // PATIENT GUIDES
     {
       id: 'patient-1',
@@ -145,8 +215,8 @@ export default function Help({ user, setActiveTab }) {
       summary: 'Quick guide for patients to verify scheduled dental consultation details.',
       action: { tab: 'search', label: 'Check Appointment' },
       steps: [
-        'Go to "Search Appointments" on the menu.',
-        'Enter the Appointment Number provided on your booking SMS or card.',
+        'Go to "Search Appointments" on the left menu.',
+        'Enter the unique Appointment Number provided on your booking SMS or card (e.g. 1).',
         'Click "Search Record" to review your appointment date, scheduled time, treatment type, and attending dental surgeon.'
       ]
     },
@@ -154,13 +224,14 @@ export default function Help({ user, setActiveTab }) {
       id: 'patient-2',
       role: 'PATIENT',
       badge: 'Patient Portal',
-      title: '2. How to View & Download Your Treatment Invoice',
-      summary: 'Accessing official clinic payment receipts for personal health records or insurance claims.',
-      action: { tab: 'billing', label: 'View Receipt' },
+      title: '2. Official Treatment Billing & Receipt Collection',
+      summary: 'Guidelines on treatment fees and receiving official clinic receipts at checkout.',
       steps: [
-        'Navigate to "Calculate & Print Bill".',
-        'Enter your Appointment Number to load your itemized receipt.',
-        'Click "Print Patient Receipt" to print a physical copy or save a PDF invoice with the official clinic header and registration details.'
+        'In accordance with clinic policy, patients cannot calculate or generate bills themselves on the self-service portal.',
+        'All treatment calculations are performed accurately by clinic front-desk staff.',
+        'Fee Structure: Base consultation fee of LKR 1,500.00 plus procedure-specific treatment cost (e.g., Teeth Cleaning: LKR 2,500, Dental Filling: LKR 3,500).',
+        'Upon conclusion of your appointment with the doctor, please proceed to the reception counter.',
+        'The receptionist will print your official itemized payment receipt with full clinic registration details and accept cash or card payment.'
       ]
     },
     {
@@ -170,7 +241,7 @@ export default function Help({ user, setActiveTab }) {
       title: '3. Sunrise Dental Clinic Contact & Emergency Care',
       summary: 'Emergency dental support, clinic location, and operating hours in Colombo.',
       steps: [
-        'Clinic Address: No. 123 Galle Road, Colombo 03, Sri Lanka',
+        'Clinic Address: No. 45 Galle Road, Colombo 03, Sri Lanka',
         'Appointment Hotline: +94 11 234 5678 / +94 77 123 4567',
         'Clinic Operating Hours: Monday to Saturday: 8:30 AM – 7:30 PM | Sunday: 9:00 AM – 2:00 PM',
         'Emergency Dental Trauma: Please call our 24/7 emergency hotline at +94 71 999 8888.'
@@ -188,6 +259,26 @@ export default function Help({ user, setActiveTab }) {
     return matchesRole && matchesSearch;
   });
 
+  const getRoleBadgeStyle = (role) => {
+    switch (role) {
+      case 'ADMIN': return 'badge-blue';
+      case 'DOCTOR': return 'badge-teal';
+      case 'STAFF': return 'badge-teal';
+      case 'PATIENT': return 'badge-amber';
+      default: return 'badge-teal';
+    }
+  };
+
+  const getRoleDisplayName = (role) => {
+    switch (role) {
+      case 'ADMIN': return 'Administrator';
+      case 'DOCTOR': return 'Dentist (Doctor)';
+      case 'STAFF': return 'Staff (Reception)';
+      case 'PATIENT': return 'Patient';
+      default: return role;
+    }
+  };
+
   return (
     <div style={{ maxWidth: '920px', margin: '0 auto', paddingBottom: '40px' }}>
       {/* Header Banner */}
@@ -195,9 +286,9 @@ export default function Help({ user, setActiveTab }) {
         <div className="card-header" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <h2 style={{ margin: 0 }}>System Help & Operating Guidelines</h2>
-              <span className={`badge ${currentRole === 'ADMIN' ? 'badge-blue' : currentRole === 'STAFF' ? 'badge-teal' : 'badge-amber'}`}>
-                Logged in as: {currentRole}
+              <h2 style={{ margin: 0 }}>System Help &amp; Operating Guidelines</h2>
+              <span className={`badge ${getRoleBadgeStyle(currentRole)}`}>
+                Logged in as: {getRoleDisplayName(currentRole)}
               </span>
             </div>
             <p className="card-subtitle">
@@ -220,6 +311,12 @@ export default function Help({ user, setActiveTab }) {
 
         {/* Role Switcher Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px', flexWrap: 'wrap' }}>
+          <button
+            className={`role-chip ${selectedRoleFilter === 'DOCTOR' ? 'active' : ''}`}
+            onClick={() => { setSelectedRoleFilter('DOCTOR'); setOpenIndex(0); }}
+          >
+            🩺 Dentist / Doctor Guide
+          </button>
           <button
             className={`role-chip ${selectedRoleFilter === 'STAFF' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('STAFF'); setOpenIndex(0); }}

@@ -153,6 +153,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getAppointmentsByDentistName(String dentistName) {
+        return appointmentRepository.findByDentistName(dentistName).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     private User resolveStaffUser(Long explicitUserId) {
         if (explicitUserId != null) {
             return userRepository.findById(explicitUserId)

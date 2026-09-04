@@ -78,22 +78,25 @@ public class SecurityConfig {
                                 "/assets/**"
                         ).permitAll()
 
-                        // Public authentication & system endpoints
-                        .requestMatchers("/api/auth/**", "/api/users/login", "/api/users/register", "/h2-console/**", "/error").permitAll()
+                        // Public authentication & system endpoints (Login ONLY)
+                        .requestMatchers("/api/auth/login", "/api/users/login", "/h2-console/**", "/error").permitAll()
 
-                        // Admin-only user management
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        // Admin-only user registration & user management
+                        .requestMatchers("/api/auth/register", "/api/users/**").hasRole("ADMIN")
 
                         // Patient endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/patients/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/patients/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/patients").hasAnyRole("ADMIN", "STAFF", "DOCTOR")
                         .requestMatchers("/api/patients/**").hasAnyRole("ADMIN", "STAFF")
 
                         // Appointment endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT")
-                        .requestMatchers(HttpMethod.GET, "/api/appointments/patient/**").hasAnyRole("ADMIN", "STAFF", "PATIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/patient/**").hasAnyRole("ADMIN", "STAFF", "PATIENT", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/dentist/**").hasAnyRole("ADMIN", "STAFF", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments").hasAnyRole("ADMIN", "STAFF", "DOCTOR")
                         .requestMatchers("/api/appointments/**").hasAnyRole("ADMIN", "STAFF")
 
-                        // Billing endpoints
+                        // Billing endpoints (Only ADMIN and STAFF can calculate/generate bills; PATIENT cannot generate bills)
                         .requestMatchers(HttpMethod.GET, "/api/bills/receipt/**").hasAnyRole("ADMIN", "STAFF", "PATIENT")
                         .requestMatchers(HttpMethod.GET, "/api/bills/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT")
                         .requestMatchers(HttpMethod.GET, "/api/bills/appointment/**").hasAnyRole("ADMIN", "STAFF", "PATIENT")

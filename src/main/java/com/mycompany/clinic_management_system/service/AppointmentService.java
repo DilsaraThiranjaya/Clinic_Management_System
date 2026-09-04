@@ -18,4 +18,5 @@ public interface AppointmentService {
     AppointmentDTO findAppointment(Long appointmentNumber);
     List<AppointmentResponseDTO> getAllAppointments();
     List<AppointmentResponseDTO> getAppointmentsByPatientId(Long patientId);
+    List<AppointmentResponseDTO> getAppointmentsByDentistName(String dentistName);
 }

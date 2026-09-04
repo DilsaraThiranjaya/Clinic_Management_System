@@ -5,6 +5,7 @@ import com.mycompany.clinic_management_system.exception.ResourceNotFoundExceptio
 import com.mycompany.clinic_management_system.model.Role;
 import com.mycompany.clinic_management_system.model.User;
 import com.mycompany.clinic_management_system.repository.UserRepository;
+import com.mycompany.clinic_management_system.service.EmailService;
 import com.mycompany.clinic_management_system.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,23 +22,46 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Override
     public User registerUser(UserDTO userDTO) {
+        Role role = userDTO.getRole() != null ? userDTO.getRole() : Role.STAFF;
+
+        if (role == Role.ADMIN) {
+            throw new IllegalArgumentException("Admin registration is not allowed. Only the system-seeded admin account is permitted.");
+        }
+
         if (userRepository.existsByUsername(userDTO.getUsername())) {
             throw new IllegalArgumentException("Username already exists: " + userDTO.getUsername());
         }
+
+        if (userDTO.getEmail() != null && !userDTO.getEmail().trim().isEmpty() && userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email is already in use: " + userDTO.getEmail());
+        }
+
         User user = new User(
                 userDTO.getUsername(),
                 passwordEncoder.encode(userDTO.getPassword()),
-                userDTO.getRole() != null ? userDTO.getRole() : Role.STAFF
+                role,
+                userDTO.getEmail()
         );
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+
+        if (savedUser.getEmail() != null && !savedUser.getEmail().trim().isEmpty()) {
+            emailService.sendRegistrationCredentialsEmail(savedUser.getEmail(), savedUser.getUsername(), userDTO.getPassword(), savedUser.getRole());
+        }
+
+        return savedUser;
     }
 
     @Override
