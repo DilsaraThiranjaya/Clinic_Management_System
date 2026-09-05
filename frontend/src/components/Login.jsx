@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { ClinicLogo, AlertCircleIcon } from './Icons';
 
 export default function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDemoHints, setShowDemoHints] = useState(false);
-
-  const fillDemo = (u, p) => {
-    setUsername(u);
-    setPassword(p);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +24,9 @@ export default function Login({ onLoginSuccess }) {
       localStorage.setItem('clinic_user', JSON.stringify({
         id: data.id,
         username: data.username,
-        role: data.role
+        role: data.role,
+        patientId: data.patientId,
+        fullName: data.fullName
       }));
 
       onLoginSuccess(data);
@@ -44,14 +41,17 @@ export default function Login({ onLoginSuccess }) {
     <div className="login-screen">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo-icon">🦷</div>
+          <div style={{ marginBottom: '12px' }}>
+            <ClinicLogo size={46} />
+          </div>
           <h2>Sunrise Dental Clinic</h2>
-          <p>Unified Portal &bull; Staff, Doctors &amp; Patients</p>
+          <p>Clinical Management Portal</p>
         </div>
 
         {error && (
-          <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#ef4444', borderRadius: '8px', fontSize: '0.88rem', marginBottom: '16px', fontWeight: '500' }}>
-            ⚠️ {error}
+          <div style={{ padding: '10px 14px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircleIcon size={16} color="#b91c1c" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -85,62 +85,6 @@ export default function Login({ onLoginSuccess }) {
             {loading ? 'Authenticating...' : 'Sign In to Portal'}
           </button>
         </form>
-
-        <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-          🔒 Single secure login for all roles. Your dashboard and clinical privileges adapt automatically upon authentication.
-        </div>
-
-        {/* Subtle expandable demo accounts helper for testing & academic evaluation */}
-        <div style={{ marginTop: '16px', borderTop: '1px dashed #e2e8f0', paddingTop: '12px' }}>
-          <button
-            type="button"
-            onClick={() => setShowDemoHints(!showDemoHints)}
-            style={{ background: 'none', border: 'none', color: '#0d9488', fontSize: '0.78rem', cursor: 'pointer', display: 'block', margin: '0 auto', fontWeight: '600' }}
-          >
-            {showDemoHints ? '▲ Hide Demo Credentials' : '▼ Quick Demo Credentials (For Evaluation)'}
-          </button>
-
-          {showDemoHints && (
-            <div style={{ marginTop: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.75rem' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
-                onClick={() => fillDemo('doctor', 'doctor123')}
-              >
-                🩺 Dentist: doctor
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
-                onClick={() => fillDemo('staff', 'staff123')}
-              >
-                🏥 Staff: staff
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
-                onClick={() => fillDemo('admin', 'admin123')}
-              >
-                ⚙️ Admin: admin
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '6px 8px', fontSize: '0.75rem' }}
-                onClick={() => fillDemo('patient', 'patient123')}
-              >
-                🦷 Patient: patient
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div style={{ marginTop: '14px', textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
-          Protected by JWT Role-Based Access Control (RBAC)
-        </div>
       </div>
     </div>
   );

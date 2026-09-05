@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import UserManagement from './components/UserManagement';
+import PatientsManagement from './components/PatientsManagement';
 import RegisterAppointment from './components/RegisterAppointment';
 import SearchAppointment from './components/SearchAppointment';
 import Billing from './components/Billing';
@@ -27,6 +28,7 @@ export default function App() {
     return 'dashboard';
   });
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [selectedPatientForBooking, setSelectedPatientForBooking] = useState(null);
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -50,9 +52,12 @@ export default function App() {
     const userData = {
       id: authData.id,
       username: authData.username,
-      role: authData.role
+      role: authData.role,
+      patientId: authData.patientId,
+      fullName: authData.fullName
     };
     setUser(userData);
+    localStorage.setItem('clinic_user', JSON.stringify(userData));
     setActiveTab(authData.role === 'PATIENT' ? 'search' : 'dashboard');
   };
 
@@ -80,20 +85,14 @@ export default function App() {
         <header className="top-bar no-print">
           <div className="top-bar-title">
             <h1>
-              {activeTab === 'dashboard' && (user.role === 'DOCTOR' ? 'Doctor Clinical Dashboard' : 'Clinic Dashboard')}
+              {activeTab === 'dashboard' && (user.role === 'DOCTOR' ? 'Doctor Clinical Dashboard' : user.role === 'ADMIN' ? 'Clinic Administration Overview' : 'Front-Desk Reception Dashboard')}
               {activeTab === 'users' && 'User & Staff Management'}
-              {activeTab === 'register' && 'Appointment Registration'}
-              {activeTab === 'search' && (user.role === 'PATIENT' ? 'Patient Appointment Lookup' : 'Appointment Lookup')}
-              {activeTab === 'billing' && 'Billing & Patient Receipts'}
-              {activeTab === 'help' && (user.role === 'DOCTOR' ? 'Doctor Clinical SOP & Guidelines' : user.role === 'PATIENT' ? 'Patient Self-Service Guide' : 'Staff Help & Documentation')}
+              {activeTab === 'patients' && (user.role === 'ADMIN' ? 'Clinic Patients Directory & Governance' : 'Reception Patients Directory & Intake')}
+              {activeTab === 'register' && (user.role === 'ADMIN' ? 'Schedule Clinic Appointment (Admin)' : 'Front-Desk Appointment Booking')}
+              {activeTab === 'search' && (user.role === 'PATIENT' ? 'My Scheduled Appointments' : user.role === 'DOCTOR' ? 'My Clinical Consultations' : user.role === 'ADMIN' ? 'Clinic Master Appointment Lookup' : 'Reception Appointment Lookup')}
+              {activeTab === 'billing' && (user.role === 'ADMIN' ? 'Billing Oversight & Patient Invoices' : 'Cashier Billing & Patient Receipts')}
+              {activeTab === 'help' && (user.role === 'DOCTOR' ? 'Doctor Clinical SOP & Guidelines' : user.role === 'PATIENT' ? 'Patient Self-Service Guide' : user.role === 'ADMIN' ? 'Administrator Operational SOP & Guide' : 'Reception Staff SOP & Documentation')}
             </h1>
-          </div>
-
-          <div className="top-bar-right">
-            <div className="status-badge">
-              <span className="status-dot"></span>
-              <span>Backend Connected (Spring Boot)</span>
-            </div>
           </div>
         </header>
 
@@ -110,11 +109,25 @@ export default function App() {
             <UserManagement />
           )}
 
+          {activeTab === 'patients' && (user.role === 'ADMIN' || user.role === 'STAFF') && (
+            <PatientsManagement
+              user={user}
+              onBookForPatient={(patient) => {
+                setSelectedPatientForBooking(patient);
+                setActiveTab('register');
+              }}
+            />
+          )}
+
           {activeTab === 'register' && (
             <RegisterAppointment
+              user={user}
               setActiveTab={setActiveTab}
+              preselectedPatient={selectedPatientForBooking}
+              onClearPreselectedPatient={() => setSelectedPatientForBooking(null)}
               onAppointmentCreated={(id) => {
                 setSelectedAppointmentId(id);
+                setSelectedPatientForBooking(null);
               }}
             />
           )}
@@ -140,3 +153,4 @@ export default function App() {
     </div>
   );
 }
+

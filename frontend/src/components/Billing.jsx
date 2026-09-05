@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { CreditCardIcon, AlertCircleIcon, ReceiptIcon } from './Icons';
 
 export default function Billing({ user, selectedId }) {
   const [appointmentNum, setAppointmentNum] = useState(selectedId ? String(selectedId) : '1');
@@ -7,14 +8,19 @@ export default function Billing({ user, selectedId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  if (user?.role === 'PATIENT') {
+  if (user?.role === 'PATIENT' || user?.role === 'DOCTOR') {
     return (
       <div className="card" style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center', padding: '36px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔒</div>
-        <h2>Patient Billing Notice</h2>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AlertCircleIcon size={32} color="#0284c7" />
+          </div>
+        </div>
+        <h2>{user?.role === 'DOCTOR' ? 'Clinical Governance Notice' : 'Patient Billing Notice'}</h2>
         <p style={{ color: '#64748b', marginTop: '8px', lineHeight: '1.6' }}>
-          In accordance with Sunrise Dental Clinic billing and clinical governance protocols, patients are not permitted to calculate or generate bills.
-          Please visit the front-desk reception counter upon completion of your appointment to settle treatment payments and receive your official invoice receipt.
+          {user?.role === 'DOCTOR'
+            ? 'In accordance with clinical governance protocols, attending dental surgeons do not handle financial billing transactions. Front-desk receptionist staff calculate and finalize patient invoices.'
+            : 'In accordance with Sunrise Dental Clinic billing protocols, patients are not permitted to calculate or generate bills. Please visit the front-desk reception counter upon completion of your appointment to settle treatment payments and receive your official invoice receipt.'}
         </p>
       </div>
     );
@@ -66,7 +72,9 @@ export default function Billing({ user, selectedId }) {
 
         <form onSubmit={handleCalculate} className="search-bar-box">
           <div className="search-input-wrap">
-            <span className="search-input-icon">💳</span>
+            <span className="search-input-icon">
+              <CreditCardIcon size={18} color="#64748b" />
+            </span>
             <input
               type="number"
               className="form-input"
@@ -81,8 +89,9 @@ export default function Billing({ user, selectedId }) {
         </form>
 
         {error && (
-          <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: '500' }}>
-            ⚠️ {error}
+          <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircleIcon size={16} color="#ef4444" />
+            <span>{error}</span>
           </div>
         )}
       </div>
@@ -144,10 +153,29 @@ export default function Billing({ user, selectedId }) {
               <span>LKR {billReceipt.baseConsultationFee?.toLocaleString() || '1,500.00'}</span>
             </div>
 
-            <div className="calc-row">
-              <span>Treatment Cost ({billReceipt.treatmentType})</span>
-              <span>LKR {billReceipt.treatmentCost?.toLocaleString() || '0.00'}</span>
-            </div>
+            {billReceipt.treatmentType?.includes(',') ? (
+              <>
+                <div style={{ padding: '8px 0 4px 0', borderBottom: '1px dashed var(--border)' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>
+                    Itemized Clinical Procedures ({billReceipt.treatmentType.split(',').length}):
+                  </span>
+                  {billReceipt.treatmentType.split(',').map((t, idx) => (
+                    <div key={idx} className="calc-row" style={{ paddingLeft: '14px', fontSize: '0.88rem', color: '#334155' }}>
+                      <span>&bull; {t.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="calc-row">
+                  <span>Total Treatment Procedures Cost</span>
+                  <span>LKR {billReceipt.treatmentCost?.toLocaleString() || '0.00'}</span>
+                </div>
+              </>
+            ) : (
+              <div className="calc-row">
+                <span>Treatment Cost ({billReceipt.treatmentType})</span>
+                <span>LKR {billReceipt.treatmentCost?.toLocaleString() || '0.00'}</span>
+              </div>
+            )}
 
             <div className="calc-row total">
               <span>TOTAL AMOUNT DUE / PAID</span>
@@ -162,8 +190,8 @@ export default function Billing({ user, selectedId }) {
           </div>
 
           <div className="no-print" style={{ marginTop: '28px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
-            <button className="btn btn-primary" onClick={handlePrint}>
-              🖨️ Print Patient Receipt
+            <button className="btn btn-primary" onClick={handlePrint} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <ReceiptIcon size={16} /> Print Patient Receipt
             </button>
           </div>
         </div>

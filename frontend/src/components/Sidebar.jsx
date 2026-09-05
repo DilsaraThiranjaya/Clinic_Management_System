@@ -1,13 +1,60 @@
 import React from 'react';
+import {
+  ClinicLogo,
+  DashboardIcon,
+  StethoscopeIcon,
+  UsersIcon,
+  UserCheckIcon,
+  CalendarPlusIcon,
+  SearchIcon,
+  CreditCardIcon,
+  HelpCircleIcon
+} from './Icons';
 
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
   const menuItems = [
-    { id: 'dashboard', label: user.role === 'DOCTOR' ? 'Clinical Dashboard' : 'Dashboard', icon: user.role === 'DOCTOR' ? '🩺' : '📊', roles: ['ADMIN', 'STAFF', 'DOCTOR'] },
-    { id: 'users', label: 'User Management', icon: '👥', roles: ['ADMIN'] },
-    { id: 'register', label: 'Register Appointment', icon: '📝', roles: ['ADMIN', 'STAFF'] },
-    { id: 'search', label: 'Search Appointments', icon: '🔍', roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT'] },
-    { id: 'billing', label: 'Calculate & Print Bill', icon: '💳', roles: ['ADMIN', 'STAFF'] },
-    { id: 'help', label: user.role === 'DOCTOR' ? 'Doctor Clinical Guide' : user.role === 'PATIENT' ? 'Patient Help Guide' : 'Help & Staff Guide', icon: '❓', roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT'] }
+    {
+      id: 'dashboard',
+      label: user.role === 'DOCTOR' ? 'Clinical Dashboard' : user.role === 'ADMIN' ? 'Admin Overview' : 'Reception Queue',
+      icon: user.role === 'DOCTOR' ? <StethoscopeIcon size={19} /> : <DashboardIcon size={19} />,
+      roles: ['ADMIN', 'STAFF', 'DOCTOR']
+    },
+    {
+      id: 'users',
+      label: 'Staff & Accounts',
+      icon: <UsersIcon size={19} />,
+      roles: ['ADMIN']
+    },
+    {
+      id: 'patients',
+      label: 'Patients Directory',
+      icon: <UserCheckIcon size={19} />,
+      roles: ['ADMIN', 'STAFF']
+    },
+    {
+      id: 'register',
+      label: user.role === 'ADMIN' ? 'Schedule Appointment' : 'Book Appointment',
+      icon: <CalendarPlusIcon size={19} />,
+      roles: ['ADMIN', 'STAFF']
+    },
+    {
+      id: 'search',
+      label: user.role === 'PATIENT' ? 'My Appointments' : user.role === 'DOCTOR' ? 'My Consultations' : 'Appointment Lookup',
+      icon: <SearchIcon size={19} />,
+      roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT']
+    },
+    {
+      id: 'billing',
+      label: user.role === 'ADMIN' ? 'Invoices & Billing' : 'Cashier & Billing',
+      icon: <CreditCardIcon size={19} />,
+      roles: ['ADMIN', 'STAFF']
+    },
+    {
+      id: 'help',
+      label: user.role === 'DOCTOR' ? 'Clinical Guidelines' : user.role === 'PATIENT' ? 'Patient Guide' : user.role === 'ADMIN' ? 'Admin SOP Guide' : 'Reception Guide',
+      icon: <HelpCircleIcon size={19} />,
+      roles: ['ADMIN', 'STAFF', 'DOCTOR', 'PATIENT']
+    }
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user.role));
@@ -24,11 +71,11 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">
-        <div className="logo-icon">🦷</div>
+      <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <ClinicLogo size={36} />
         <div className="logo-text">
-          <h2>Sunrise Dental</h2>
-          <span>Colombo Clinic</span>
+          <h2 style={{ fontSize: '1.15rem', margin: 0, fontWeight: 700 }}>Sunrise Dental</h2>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Clinical Management</span>
         </div>
       </div>
 
@@ -39,7 +86,9 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
             className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
             onClick={() => setActiveTab(item.id)}
           >
-            <span className="icon">{item.icon}</span>
+            <span className="icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              {item.icon}
+            </span>
             <span>{item.label}</span>
           </button>
         ))}
@@ -50,7 +99,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
           <div className="user-info">
             <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
             <div className="user-details">
-              <h4>{user.username}</h4>
+              <h4>{user.fullName || user.username}</h4>
               <span>{formatRoleLabel(user.role)}</span>
             </div>
           </div>

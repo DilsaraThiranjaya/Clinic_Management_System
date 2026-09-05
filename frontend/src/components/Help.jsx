@@ -12,127 +12,144 @@ export default function Help({ user, setActiveTab }) {
       id: 'staff-1',
       role: 'STAFF',
       badge: 'Front-Desk SOP',
-      title: '1. How to Register a New Patient & Schedule Appointment',
-      summary: 'Complete workflow for onboarding patients and reserving dental chair slots with automated deduplication.',
+      title: '1. How to Search Registered Patients & Book Appointments',
+      summary: 'Search existing patients by mobile, name, or ID, or register new patients, and schedule multi-treatment appointments.',
       action: { tab: 'register', label: 'Open Registration' },
       steps: [
         'Navigate to "Register Appointment" on the left sidebar menu.',
-        'Enter patient demographic details: Full Name, Residential Address, and a valid 10–15 digit Contact Number.',
-        'Intelligent Deduplication: If the patient has visited before, the system automatically links to their existing patient record by contact number.',
-        'Select the attending Dental Surgeon from the dropdown list.',
-        'Choose the required Treatment Type (e.g., Teeth Cleaning, Root Canal, Orthodontics). The live fee estimate preview updates instantly.',
-        'Select the desired Appointment Date and Time.',
-        'Click "Confirm & Save Appointment". The system generates and displays a unique Appointment Number (e.g., #101).'
+        'Search & Select Registered Patient: In the search box, start typing the patient\'s Mobile Number, Full Name, or Patient ID.',
+        'Select Existing Patient: Click on the matching patient from the search results to automatically load and lock their registered name, address, and contact number.',
+        'Quick Registration for New Patients: If the patient is visiting for the first time, click "+ Register New Patient" to add their profile directly to the clinic directory.',
+        'Doctor Assignment: Select the attending Dental Surgeon from the dropdown list.',
+        'Multi-Treatment Selection: Check one or more dental treatments (e.g., Teeth Cleaning, Dental Filling). The total consultation and treatment fee estimate calculates automatically.',
+        'Date & Time Booking: Choose the scheduled appointment date and time, then click "Confirm & Save Appointment" to issue an official appointment reference number.'
       ]
     },
     {
       id: 'staff-2',
       role: 'STAFF',
       badge: 'Front-Desk SOP',
-      title: '2. How to Search & Retrieve Appointment Details',
-      summary: 'Lookup existing appointments for patient check-in, verification, and schedule inspection.',
-      action: { tab: 'search', label: 'Open Search' },
+      title: '2. Managing the Clinic Patients Directory',
+      summary: 'View and search all registered patients, register new clinic visitors, and initiate appointment bookings.',
+      action: { tab: 'patients', label: 'Open Patients Directory' },
       steps: [
-        'Navigate to "Search Appointments" on the left sidebar.',
-        'Enter the unique Appointment Number provided to the patient.',
-        'Click "Search Record" to retrieve full patient demographics, appointment schedule, treatment type, and registering staff info.',
-        'Use the "Proceed to Generate & Print Bill" button to seamlessly transfer to the billing module.'
+        'Navigate to "Patients Directory" on the left sidebar menu.',
+        'Search through all registered clinic patients by phone number, name, or residential address.',
+        'Click "+ Register New Patient" to register new clinic visitors into the database at any time.',
+        'Click "Book Appointment" on any patient card to immediately initiate a new appointment booking with their demographics pre-filled.'
       ]
     },
     {
       id: 'staff-3',
       role: 'STAFF',
       badge: 'Front-Desk SOP',
-      title: '3. How to Calculate Treatment Fees & Print Official Receipts',
-      summary: 'Standard clinical billing calculations and producing print-ready patient invoice receipts.',
-      action: { tab: 'billing', label: 'Open Billing' },
+      title: '3. How to Search & Retrieve Scheduled Appointments',
+      summary: 'Lookup existing appointments for patient check-in, verification, and schedule inspection.',
+      action: { tab: 'search', label: 'Open Search' },
       steps: [
-        'Navigate to "Calculate & Print Bill" on the sidebar.',
-        'Enter the Appointment Number and click "Calculate & Generate".',
-        'Formula Applied: Total Bill = Base Consultation Fee (LKR 1,500.00) + Treatment-Specific Tariff.',
-        'Verify the itemized breakdown on the clinical invoice preview.',
-        'Click "Print Patient Receipt" to trigger the browser print dialog or save as a PDF receipt for the patient.'
+        'Navigate to "Search Appointments" on the left sidebar.',
+        'Enter the patient\'s unique Appointment Number (e.g., #101) provided during booking.',
+        'Click "Search Record" to review scheduled date, attending dentist, planned treatments, and booking status.',
+        'Click "Proceed to Generate & Print Bill" when the patient arrives for checkout.'
       ]
     },
     {
       id: 'staff-4',
       role: 'STAFF',
-      badge: 'Pricing Reference',
-      title: '4. Standard Clinical Treatment Pricing Tariff',
-      summary: 'Deterministic price matrix for dental procedures administered at Sunrise Dental Clinic.',
+      badge: 'Front-Desk SOP',
+      title: '4. Multi-Treatment Fee Calculation & Official Invoice Receipts',
+      summary: 'Standard clinical billing calculations and producing print-ready patient invoice receipts.',
+      action: { tab: 'billing', label: 'Open Billing' },
       steps: [
-        'Base Consultation Fee: LKR 1,500.00 (Standard for all clinical visits)',
-        'Teeth Cleaning / Polishing: LKR 2,500.00 (Total: LKR 4,000.00)',
-        'Dental Filling / Restoration: LKR 3,500.00 (Total: LKR 5,000.00)',
-        'Tooth Extraction (Simple/Surgical): LKR 4,500.00 (Total: LKR 6,000.00)',
-        'Teeth Whitening (Bleaching): LKR 8,000.00 (Total: LKR 9,500.00)',
-        'Root Canal Treatment (Endodontic): LKR 15,000.00 (Total: LKR 16,500.00)',
-        'Orthodontics / Dental Braces: LKR 45,000.00 (Total: LKR 46,500.00)'
+        'Navigate to "Calculate & Print Bill" on the sidebar.',
+        'Enter the Appointment Number and click "Calculate & Generate".',
+        'Accurate Fee Calculation: The system tallies the standard Base Consultation Fee (LKR 1,500.00) plus the exact tariffs for all selected dental procedures.',
+        'Verify the itemized breakdown on the clinical invoice preview including dental treatments, clinic header, and appointment date.',
+        'Click "Print Patient Receipt" to produce the official patient receipt on clinic letterhead for payment collection (cash or card).'
       ]
     },
     {
       id: 'staff-5',
       role: 'STAFF',
-      badge: 'Security Protocol',
-      title: '5. Safe Shift Handover & Application Exit',
-      summary: 'Security guidelines for front-desk terminals during shift changes.',
+      badge: 'Pricing Reference',
+      title: '5. Standard Clinical Dental Treatment Tariff',
+      summary: 'Standard clinical price matrix for dental procedures administered at Sunrise Dental Clinic.',
       steps: [
-        'Always click the "Exit" button at the bottom of the sidebar when leaving your desk.',
-        'Exiting immediately invalidates your JWT authentication token and clears local storage.',
-        'Never share receptionist user credentials with unauthorized personnel.'
+        'Base Consultation Fee: LKR 1,500.00 (Standard for all clinical visits)',
+        'Teeth Cleaning / Prophylaxis: LKR 2,500.00',
+        'Dental Filling / Composite Restoration: LKR 3,500.00',
+        'Tooth Extraction (Simple / Surgical): LKR 4,500.00',
+        'Teeth Whitening (Bleaching): LKR 8,000.00',
+        'Root Canal Treatment (Endodontics): LKR 15,000.00',
+        'Orthodontics / Dental Braces: LKR 45,000.00',
+        'General Dental Consultation: LKR 2,000.00'
+      ]
+    },
+    {
+      id: 'staff-6',
+      role: 'STAFF',
+      badge: 'Front-Desk SOP',
+      title: '6. Safe Reception Shift Handover & Terminal Logout',
+      summary: 'Protocols for safeguarding front-desk terminals during shift changes.',
+      steps: [
+        'Always click the "Exit" button at the bottom of the sidebar when leaving your desk or handing over shifts.',
+        'Exiting immediately ends your active session and locks the terminal to protect patient healthcare records.',
+        'Never share receptionist user credentials; ensure each staff member logs in under their assigned clinic account.'
       ]
     },
 
-    // ADMIN GUIDES
+    // ADMIN GUIDES (Clinical Administration & Governance)
     {
       id: 'admin-1',
       role: 'ADMIN',
       badge: 'Administration',
-      title: '1. Staff Credential & Role-Based Access Control (RBAC)',
-      summary: 'Managing system users, authorization boundaries, and security enforcement.',
-      action: { tab: 'dashboard', label: 'View System Status' },
+      title: '1. Clinic Staff Accounts & Permission Management',
+      summary: 'Managing clinic personnel profiles, job roles, and operational access.',
+      action: { tab: 'users', label: 'Manage Clinic Users' },
       steps: [
-        'User roles are partitioned into ADMIN, STAFF, and PATIENT.',
-        'Administrators have exclusive authorization to query all registered accounts via /api/users endpoints.',
-        'All user passwords are cryptographically hashed using salted BCrypt (10 rounds) prior to database persistence.',
-        'JWT tokens are signed with HMAC-SHA256 and configured with an expiration window of 24 hours.'
+        'Clinic user accounts are structured into Administrator, Attending Dental Surgeon (Doctor), Front-Desk Receptionist (Staff), and Patient.',
+        'Administrators can register new clinic staff and dental practitioners in the "Clinic & Users" tab.',
+        'Each clinic employee is assigned an individual password-protected profile ensuring all registered appointments, clinical notes, and billing receipts maintain clear staff accountability.',
+        'Deactivate or update user credentials promptly whenever clinic staff change shifts or leave employment.'
       ]
     },
     {
       id: 'admin-2',
       role: 'ADMIN',
       badge: 'Data Governance',
-      title: '2. Patient Record Governance & Deletion Policy',
-      summary: 'Guidelines for managing clinical data integrity and executing GDPR-compliant record deletion.',
+      title: '2. Patient Records Governance & Confidentiality',
+      summary: 'Ensuring patient medical records integrity, privacy compliance, and safe record management.',
+      action: { tab: 'patients', label: 'View Patients Directory' },
       steps: [
-        'To prevent accidental medical history loss, only ADMIN users are authorized to delete patient records (DELETE /api/patients/{id}).',
-        'Staff members are restricted to creating and updating records.',
-        'Before deleting any record, ensure there are no active dependencies or unresolved invoices associated with the patient.'
+        'All patient demographic records and contact numbers are strictly confidential clinic property.',
+        'Both Front-Desk Staff and Administrators can register new patients and search patient files across the clinic.',
+        'To protect medical history integrity, patient records with existing appointments or billing receipts cannot be deleted.',
+        'Always ensure staff enter accurate telephone numbers during intake to maintain patient communication and appointment reminder reliability.'
       ]
     },
     {
       id: 'admin-3',
       role: 'ADMIN',
       badge: 'Analytics',
-      title: '3. Clinical Oversight & Decision-Making Reports',
-      summary: 'Utilizing system analytics for clinical scheduling, operatory preparation, and financial auditing.',
-      action: { tab: 'dashboard', label: 'Open Dashboard' },
+      title: '3. Clinic Analytics & Practice Oversight',
+      summary: 'Utilizing system analytics for clinic scheduling, operatory preparation, and financial auditing.',
+      action: { tab: 'dashboard', label: 'Open Clinic Dashboard' },
       steps: [
-        'Daily Appointment Schedule: Review attending dentist workload distribution and upcoming treatments.',
-        'Treatment Revenue Breakdown: Track aggregate financial turnover across high-value procedures (e.g. Orthodontics, Root Canals).',
-        'Patient Flow Metrics: Monitor new patient acquisition versus returning patient visits.'
+        'Access the Clinic Dashboard to monitor real-time clinical activity, total appointments scheduled today, and doctor workloads.',
+        'Track overall revenue performance generated across various dental treatments (such as Orthodontics, Root Canals, and Restorations).',
+        'Review patient traffic trends to allocate dental chair capacity and manage staff scheduling efficiently.'
       ]
     },
     {
       id: 'admin-4',
       role: 'ADMIN',
-      badge: 'System Architecture',
-      title: '4. Database Architecture & Transaction Integrity',
-      summary: 'Relational data persistence, foreign key relationships, and ACID compliance.',
+      badge: 'Practice Operations',
+      title: '4. Practice Continuity & Data Backup Protocol',
+      summary: 'Guidelines for safeguarding clinic records and ensuring seamless daily operations.',
       steps: [
-        'The persistence layer utilizes MySQL 8.0 with Spring Data JPA and Hibernate ORM.',
-        'All database tables (users, patients, appointments, bills) are normalized to 3rd Normal Form (3NF).',
-        'Datasource management uses a thread-safe Singleton Pattern (DatabaseConnection.java) with double-checked locking.'
+        'All appointments, patient demographics, clinical notes, and financial receipts are centralized in the clinic\'s secure medical records system.',
+        'Clinic supervisors should ensure regular database backup schedules are maintained to safeguard patient records against hardware or power disruptions.',
+        'Ensure clinic contact hotlines, consultation fees, and working hours are regularly validated across all reception terminals.'
       ]
     },
 
@@ -197,12 +214,12 @@ export default function Help({ user, setActiveTab }) {
       id: 'doctor-5',
       role: 'DOCTOR',
       badge: 'Security & Hygiene',
-      title: '5. Infection Control, Data Privacy & Session Termination',
-      summary: 'Standard clinical hygiene compliance, healthcare data ethics, and secure terminal exit.',
+      title: '5. Infection Control, Data Privacy & Terminal Security',
+      summary: 'Standard clinical hygiene compliance, healthcare data ethics, and safe session exit.',
       steps: [
         'Maintain strict infection control and sterilization guidelines between patient chairside sessions.',
-        'Ensure patient medical confidentiality in accordance with medical ethics and data protection standards.',
-        'When stepping away from the operatory terminal or completing your shift, click the "Exit" button at the bottom of the sidebar to invalidate your JWT session.'
+        'Ensure patient medical confidentiality in accordance with medical ethics and healthcare privacy standards.',
+        'When stepping away from the operatory terminal or completing your shift, click the "Exit" button at the bottom of the sidebar to safely log out and protect patient privacy.'
       ]
     },
 
@@ -301,7 +318,7 @@ export default function Help({ user, setActiveTab }) {
             <input
               type="text"
               className="form-input"
-              placeholder="🔍 Search instructions..."
+              placeholder="Search instructions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ fontSize: '0.88rem', padding: '8px 14px' }}
@@ -315,31 +332,31 @@ export default function Help({ user, setActiveTab }) {
             className={`role-chip ${selectedRoleFilter === 'DOCTOR' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('DOCTOR'); setOpenIndex(0); }}
           >
-            🩺 Dentist / Doctor Guide
+            Dentist / Doctor Guide
           </button>
           <button
             className={`role-chip ${selectedRoleFilter === 'STAFF' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('STAFF'); setOpenIndex(0); }}
           >
-            📋 Receptionist / Staff Guide
+            Receptionist / Staff Guide
           </button>
           <button
             className={`role-chip ${selectedRoleFilter === 'ADMIN' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('ADMIN'); setOpenIndex(0); }}
           >
-            ⚙️ Administrator Guide
+            Administrator Guide
           </button>
           <button
             className={`role-chip ${selectedRoleFilter === 'PATIENT' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('PATIENT'); setOpenIndex(0); }}
           >
-            🦷 Patient Self-Service
+            Patient Self-Service
           </button>
           <button
             className={`role-chip ${selectedRoleFilter === 'ALL' ? 'active' : ''}`}
             onClick={() => { setSelectedRoleFilter('ALL'); setOpenIndex(0); }}
           >
-            📚 View All Guides ({guides.length})
+            All Guides ({guides.length})
           </button>
         </div>
       </div>
@@ -347,7 +364,7 @@ export default function Help({ user, setActiveTab }) {
       {/* Guide Cards */}
       {filteredGuides.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-          <p style={{ fontSize: '1.2rem', marginBottom: '8px' }}>🔎 No matching instructions found</p>
+          <p style={{ fontSize: '1.1rem', marginBottom: '8px', fontWeight: '600' }}>No matching instructions found</p>
           <p style={{ fontSize: '0.9rem' }}>Try changing your search term or selecting a different role filter above.</p>
         </div>
       ) : (
@@ -422,7 +439,7 @@ export default function Help({ user, setActiveTab }) {
                           style={{ padding: '7px 14px', fontSize: '0.85rem' }}
                           onClick={() => setActiveTab(guide.action.tab)}
                         >
-                          🚀 {guide.action.label}
+                          {guide.action.label} &rarr;
                         </button>
                       </div>
                     )}

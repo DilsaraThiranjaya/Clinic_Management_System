@@ -445,6 +445,116 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--teal);
 }
 
+/* Multi-treatment selection styling */
+.treatment-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.treatment-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.treatment-card-item:hover {
+  border-color: var(--teal);
+  background: #f0fdfa;
+  transform: translateY(-1px);
+}
+
+.treatment-card-item.selected {
+  border-color: var(--teal);
+  background: #f0fdfa;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+.treatment-card-item .item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.treatment-card-item .item-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.treatment-card-item.selected .item-checkbox {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+.treatment-card-item .item-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.treatment-card-item .item-price {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--teal);
+  background: rgba(13, 148, 136, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.selected-treatments-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.selected-treatment-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #bae6fd;
+}
+
+.selected-treatment-tag button {
+  background: none;
+  border: none;
+  color: #0284c7;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.selected-treatment-tag button:hover {
+  color: #e11d48;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
