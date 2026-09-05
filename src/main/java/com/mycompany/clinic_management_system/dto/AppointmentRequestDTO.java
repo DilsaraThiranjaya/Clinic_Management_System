@@ -34,7 +34,7 @@ public class AppointmentRequestDTO {
     private String dentistName;
 
     @NotBlank(message = "Treatment type is required")
-    @Size(min = 2, max = 100, message = "Treatment type must be between 2 and 100 characters")
+    @Size(min = 2, max = 255, message = "Treatment type must be between 2 and 255 characters")
     private String treatmentType;
 
     @NotNull(message = "Appointment date is required")

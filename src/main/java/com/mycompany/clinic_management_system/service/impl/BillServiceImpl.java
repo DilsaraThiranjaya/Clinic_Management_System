@@ -8,11 +8,13 @@ import com.mycompany.clinic_management_system.model.Appointment;
 import com.mycompany.clinic_management_system.model.Bill;
 import com.mycompany.clinic_management_system.repository.AppointmentRepository;
 import com.mycompany.clinic_management_system.repository.BillRepository;
+import com.mycompany.clinic_management_system.repository.TreatmentRepository;
 import com.mycompany.clinic_management_system.service.BillService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +29,20 @@ public class BillServiceImpl implements BillService {
 
     private final BillRepository billRepository;
     private final AppointmentRepository appointmentRepository;
+    private TreatmentRepository treatmentRepository;
 
     public BillServiceImpl(BillRepository billRepository, AppointmentRepository appointmentRepository) {
         this.billRepository = billRepository;
         this.appointmentRepository = appointmentRepository;
+    }
+
+    @Autowired
+    public BillServiceImpl(BillRepository billRepository,
+                           AppointmentRepository appointmentRepository,
+                           TreatmentRepository treatmentRepository) {
+        this.billRepository = billRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.treatmentRepository = treatmentRepository;
     }
 
     @Override
@@ -159,12 +171,26 @@ public class BillServiceImpl implements BillService {
         double treatmentCost = getTreatmentSpecificCost(treatmentType);
         double totalCost = BASE_CONSULTATION_FEE + treatmentCost;
 
+        List<Map<String, Object>> itemizedTreatments = new java.util.ArrayList<>();
+        if (treatmentType != null && !treatmentType.isBlank()) {
+            for (String single : treatmentType.split(",")) {
+                String trimmed = single.trim();
+                if (!trimmed.isEmpty()) {
+                    itemizedTreatments.add(Map.of(
+                            "name", trimmed,
+                            "cost", getSingleTreatmentCost(trimmed)
+                    ));
+                }
+            }
+        }
+
         return Map.of(
                 "treatmentType", treatmentType != null ? treatmentType : "General Consultation",
                 "baseConsultationFee", BASE_CONSULTATION_FEE,
                 "treatmentSpecificCost", treatmentCost,
                 "totalCalculatedCost", totalCost,
-                "currency", "LKR"
+                "currency", "LKR",
+                "itemizedTreatments", itemizedTreatments
         );
     }
 
@@ -174,17 +200,40 @@ public class BillServiceImpl implements BillService {
     }
 
     private double getTreatmentSpecificCost(String treatmentType) {
-        if (treatmentType == null) {
+        if (treatmentType == null || treatmentType.isBlank()) {
             return 0.0;
         }
 
-        return switch (treatmentType.trim().toLowerCase()) {
+        if (treatmentType.contains(",")) {
+            return java.util.Arrays.stream(treatmentType.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .mapToDouble(this::getSingleTreatmentCost)
+                    .sum();
+        }
+
+        return getSingleTreatmentCost(treatmentType.trim());
+    }
+
+    private double getSingleTreatmentCost(String singleTreatment) {
+        if (singleTreatment == null || singleTreatment.isBlank()) {
+            return 0.0;
+        }
+
+        if (treatmentRepository != null) {
+            var opt = treatmentRepository.findByNameIgnoreCase(singleTreatment.trim());
+            if (opt.isPresent()) {
+                return opt.get().getPrice();
+            }
+        }
+
+        return switch (singleTreatment.trim().toLowerCase()) {
             case "cleaning", "teeth cleaning" -> 2500.00;
             case "filling", "dental filling" -> 3500.00;
             case "extraction", "tooth extraction" -> 4500.00;
             case "whitening", "teeth whitening" -> 8000.00;
             case "root canal", "root canal treatment" -> 15000.00;
-            case "braces", "orthodontics" -> 45000.00;
+            case "braces", "orthodontics", "orthodontics (braces)" -> 45000.00;
             default -> 2000.00;
         };
     }

@@ -13,6 +13,8 @@ public class AuthResponseDTO {
     private String username;
     private Role role;
     private long expiresIn;
+    private Long patientId;
+    private String fullName;
 
     public AuthResponseDTO() {
     }
@@ -25,6 +27,18 @@ public class AuthResponseDTO {
         this.role = role;
         this.expiresIn = expiresIn;
     }
+
+    public AuthResponseDTO(String token, Long id, String username, Role role, long expiresIn, Long patientId, String fullName) {
+        this.token = token;
+        this.type = "Bearer";
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.expiresIn = expiresIn;
+        this.patientId = patientId;
+        this.fullName = fullName;
+    }
+
 
     public String getToken() {
         return token;
@@ -72,5 +86,21 @@ public class AuthResponseDTO {
 
     public void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public Long getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(Long patientId) {
+        this.patientId = patientId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

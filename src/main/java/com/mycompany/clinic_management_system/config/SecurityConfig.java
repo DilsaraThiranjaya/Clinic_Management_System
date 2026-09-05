@@ -81,7 +81,9 @@ public class SecurityConfig {
                         // Public authentication & system endpoints (Login ONLY)
                         .requestMatchers("/api/auth/login", "/api/users/login", "/h2-console/**", "/error").permitAll()
 
-                        // Admin-only user registration & user management
+                        // User & Doctor Directory endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/users/doctors").hasAnyRole("ADMIN", "STAFF", "DOCTOR", "PATIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/users/register").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/auth/register", "/api/users/**").hasRole("ADMIN")
 
                         // Patient endpoints
@@ -90,6 +92,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/patients/**").hasAnyRole("ADMIN", "STAFF")
 
                         // Appointment endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/my").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyRole("ADMIN", "STAFF", "PATIENT", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "/api/appointments/patient/**").hasAnyRole("ADMIN", "STAFF", "PATIENT", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "/api/appointments/dentist/**").hasAnyRole("ADMIN", "STAFF", "DOCTOR")

@@ -4,6 +4,7 @@ import com.mycompany.clinic_management_system.model.Role;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,6 +17,9 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username:sahanlearnersofficial@gmail.com}")
+    private String fromEmail;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -79,7 +83,8 @@ public class EmailService {
     @Async
     public void sendRegistrationWelcomeEmail(String toEmail, String username) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply@clinicmanagement.com");
+        String sender = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail : "sahanlearnersofficial@gmail.com";
+        message.setFrom(sender);
         message.setTo(toEmail);
         message.setSubject("Welcome to Sunrise Dental Clinic");
         message.setText("Dear " + username + ",\n\n" +
@@ -90,7 +95,7 @@ public class EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            log.error("Failed to send welcome email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send welcome email to {}: {}", toEmail, e.getMessage(), e);
         }
     }
 
@@ -98,7 +103,8 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("noreply@sunrisedental.com");
+            String sender = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail : "sahanlearnersofficial@gmail.com";
+            helper.setFrom(sender, "Sunrise Dental Clinic");
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(textContent, htmlContent);
@@ -106,7 +112,7 @@ public class EmailService {
             mailSender.send(message);
             log.info("Successfully sent email to {} with subject: '{}'", toEmail, subject);
         } catch (Exception e) {
-            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send email to {}: {}", toEmail, e.getMessage(), e);
         }
     }
 

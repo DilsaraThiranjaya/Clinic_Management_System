@@ -19,12 +19,71 @@ public class UserDTO {
     @Size(min = 6, max = 100, message = "Password must have at least 6 characters")
     private String password;
 
-    @NotNull(message = "Role is required (ADMIN, STAFF, or PATIENT)")
+    @NotNull(message = "Role is required (ADMIN, STAFF, DOCTOR, or PATIENT)")
     private Role role;
 
     private String email;
 
+    private String fullName;
+
+    private String contactNumber;
+
+    private String address;
+
+    private Long patientId;
+
     public UserDTO() {
+    }
+
+
+    public UserDTO(Long id, String username, Role role, String email, String fullName) {
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.email = email;
+        this.fullName = fullName;
+    }
+
+    public UserDTO(Long id, String username, Role role, String email, String fullName, String contactNumber, String address) {
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.email = email;
+        this.fullName = fullName;
+        this.contactNumber = contactNumber;
+        this.address = address;
+    }
+
+    public UserDTO(Long id, String username, Role role, String email, String fullName, String contactNumber, String address, Long patientId) {
+        this.id = id;
+        this.username = username;
+        this.role = role;
+        this.email = email;
+        this.fullName = fullName;
+        this.contactNumber = contactNumber;
+        this.address = address;
+        this.patientId = patientId;
+    }
+
+    public UserDTO(Long id, String username, String password, Role role, String email, String fullName, String contactNumber, String address) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.fullName = fullName;
+        this.contactNumber = contactNumber;
+        this.address = address;
+    }
+
+
+    public UserDTO(Long id, String username, String password, Role role, String email, String fullName) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.fullName = fullName;
     }
 
     public UserDTO(Long id, String username, Role role, String email) {
@@ -94,4 +153,38 @@ public class UserDTO {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Long getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(Long patientId) {
+        this.patientId = patientId;
+    }
 }
+
+

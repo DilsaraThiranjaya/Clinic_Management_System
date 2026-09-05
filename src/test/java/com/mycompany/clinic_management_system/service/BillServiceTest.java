@@ -181,4 +181,37 @@ public class BillServiceTest {
         assertEquals(1L, receipt.getBillId());
         assertEquals(LocalDate.now(), existingBill.getIssueDate());
     }
+
+    @Test
+    @DisplayName("TC-BILL-08: Multi-treatment appointment calculates sum of all selected procedures correctly")
+    void testCalculateAndGenerateBill_MultipleTreatments_CalculatesSumCorrectly() {
+        Appointment multiTreatmentAppt = new Appointment(
+                103L,
+                mockPatient,
+                mockStaff,
+                "Dr. Samantha Fernando",
+                "Teeth Cleaning, Dental Filling",
+                LocalDate.of(2026, 8, 20),
+                LocalTime.of(11, 0)
+        );
+        Bill multiBill = new Bill(3L, multiTreatmentAppt, 7500.00, LocalDate.now());
+
+        when(appointmentRepository.findById(103L)).thenReturn(Optional.of(multiTreatmentAppt));
+        when(billRepository.findByAppointmentAppointmentNumber(103L)).thenReturn(Optional.empty());
+        when(billRepository.save(any(Bill.class))).thenReturn(multiBill);
+
+        BillReceiptDTO receipt = billService.calculateAndGenerateBill(103L);
+
+        assertNotNull(receipt);
+        assertEquals(3L, receipt.getBillId());
+        assertEquals(1500.00, receipt.getBaseConsultationFee());
+        assertEquals(6000.00, receipt.getTreatmentCost()); // 2500 (cleaning) + 3500 (filling)
+        assertEquals(7500.00, receipt.getTotalCost()); // 1500 + 6000
+        assertEquals("Teeth Cleaning, Dental Filling", receipt.getTreatmentType());
+
+        Map<String, Object> breakdown = billService.calculateCostBreakdown("Teeth Cleaning, Dental Filling");
+        assertEquals(1500.00, breakdown.get("baseConsultationFee"));
+        assertEquals(6000.00, breakdown.get("treatmentSpecificCost"));
+        assertEquals(7500.00, breakdown.get("totalCalculatedCost"));
+    }
 }

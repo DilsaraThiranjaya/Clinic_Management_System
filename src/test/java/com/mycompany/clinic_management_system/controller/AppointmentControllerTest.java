@@ -55,6 +55,9 @@ public class AppointmentControllerTest {
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
 
+    @MockBean
+    private com.mycompany.clinic_management_system.repository.UserRepository userRepository;
+
     @Test
     @DisplayName("TC-CTRL-APPT-01: POST /api/appointments with valid body returns 201 Created")
     void testRegisterAppointment_ValidRequest_ReturnsCreated() throws Exception {
@@ -179,5 +182,12 @@ public class AppointmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].dentistName").value("Dr. Samantha Fernando"));
+    }
+
+    @Test
+    @DisplayName("TC-CTRL-APPT-08: GET /api/appointments/my returns list")
+    void testGetMyAppointments_ReturnsList() throws Exception {
+        mockMvc.perform(get("/api/appointments/my"))
+                .andExpect(status().isOk());
     }
 }

@@ -43,8 +43,8 @@ public class Appointment {
     private String dentistName;
 
     @NotBlank(message = "Treatment type cannot be blank")
-    @Size(min = 2, max = 100, message = "Treatment type must be between 2 and 100 characters")
-    @Column(name = "treatment_type", nullable = false, length = 100)
+    @Size(min = 2, max = 255, message = "Treatment type must be between 2 and 255 characters")
+    @Column(name = "treatment_type", nullable = false, length = 255)
     private String treatmentType;
 
     @NotNull(message = "Appointment date is required")
